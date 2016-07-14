@@ -1,0 +1,26 @@
+fileFormatVersion: 2
+guid: 2cd850f93ccc1294084251e31fbfedf6
+timeCreated: 1466499238
+licenseType: Store
+PluginImporter:
+  serializedVersion: 1
+  iconMap:
+    NATTraversal.NATHelper: {fileID: 2800000, guid: 3425f1e205806984ba54efc1cbd15b3a,
+      type: 3}
+  executionOrder: {}
+  isPreloaded: 0
+  platformData:
+    Any:
+      enabled: 1
+      settings: {}
+    Editor:
+      enabled: 0
+      settings:
+        DefaultValueInitialized: true
+    WindowsStoreApps:
+      enabled: 0
+      settings:
+        CPU: AnyCPU
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
