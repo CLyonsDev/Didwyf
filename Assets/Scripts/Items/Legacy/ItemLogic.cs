@@ -16,7 +16,7 @@ public class ItemLogic : NetworkBehaviour {
 
     // Use this for initialization
     void Start () {
-        spriteList = GameObject.Find("InventoryScreen").GetComponent<ItemDatabase>().sprites;
+        spriteList = GameObject.Find("InventoryScreen").GetComponent<ItemDatabase_OLD>().sprites;
         inventoryPanel = GameObject.Find("InventoryPanel");
         //Debug.Log(curItem.itemName);
         if (curItem.itemSprite == null)

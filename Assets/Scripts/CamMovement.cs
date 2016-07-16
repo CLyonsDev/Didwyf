@@ -14,9 +14,7 @@ public class CamMovement : NetworkBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        //This is so fucking terrible I should kill myself for even writing it.
-        //Maybe we can cover it up with a fade-in.
-        //Unity script execution order is so fucked.
+
         if(!isClient)
             Destroy(gameObject);
 

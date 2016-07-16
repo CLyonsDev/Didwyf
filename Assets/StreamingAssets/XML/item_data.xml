@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<ItemDatabase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Weapons>
+    <ItemEntry>
+      <itemName>Steel Sword</itemName>
+      <itemID>0</itemID>
+      <damage>10</damage>
+      <armor>0</armor>
+      <type>Weapon</type>
+      <value>25</value>
+      <rarity>Common</rarity>
+      <spritePath>Sprites/Items/steel_sword</spritePath>
+    </ItemEntry>
+    <ItemEntry>
+      <itemName>Leather Gauntlet</itemName>
+      <itemID>1</itemID>
+      <damage>0</damage>
+      <armor>10</armor>
+      <type>Armor</type>
+      <value>10</value>
+      <rarity>Common</rarity>
+      <spritePath>Sprites/Items/leather_glove</spritePath>
+    </ItemEntry>
+    <ItemEntry>
+      <itemName>Health Potion</itemName>
+      <itemID>2</itemID>
+      <damage>0</damage>
+      <armor>0</armor>
+      <type>Consumable</type>
+      <value>100</value>
+      <rarity>Uncommon</rarity>
+      <spritePath>Sprites/Items/health_potion</spritePath>
+    </ItemEntry>
+    <ItemEntry>
+      <itemName>Simple Knife</itemName>
+      <itemID>3</itemID>
+      <damage>5</damage>
+      <armor>0</armor>
+      <type>Weapon</type>
+      <value>5</value>
+      <rarity>Plentiful</rarity>
+      <spritePath>Sprites/Items/simple_knife</spritePath>
+    </ItemEntry>
+    <ItemEntry>
+      <itemName>Mysterious Stone</itemName>
+      <itemID>4</itemID>
+      <damage>0</damage>
+      <armor>0</armor>
+      <type>Misc</type>
+      <value>0</value>
+      <rarity>Unique</rarity>
+      <spritePath>Sprites/Items/mysterious_stone</spritePath>
+    </ItemEntry>
+  </Weapons>
+</ItemDatabase>

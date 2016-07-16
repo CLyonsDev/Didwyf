@@ -10,6 +10,7 @@ public class PlayerNetworkSetup : NetworkBehaviour {
         {
             GetComponent<Movement>().enabled = true;
             GetComponent<Rotation>().enabled = true;
+            GetComponent<Player>().enabled = true;
             transform.tag = "LocalPlayer";
         }
     }

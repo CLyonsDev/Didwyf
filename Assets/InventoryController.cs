@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-public class InventoryController : MonoBehaviour {
+public class InventoryController : NetworkBehaviour {
 
     public Transform selectedItem, selectedSlot, originalSlot;
 
-    public GameObject slotPrefab, itemPrefab;
+    public GameObject slotPrefab, itemPrefab, localPlayer;
 
     GameObject[] inventorySlots;
 
@@ -15,17 +16,7 @@ public class InventoryController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-
-        inventorySlots = GameObject.FindGameObjectsWithTag("ItemSlot");
-
-        for(int i = 0; i < ItemDatabase.itemList.Count; i++)
-        {
-            GameObject newItem = Instantiate(itemPrefab) as GameObject;
-            newItem.transform.SetParent(inventorySlots[i].transform, false);
-            newItem.GetComponent<ItemLogic>().curItem = ItemDatabase.itemList[i];
-            newItem.name = ItemDatabase.itemList[i].itemName;
-            
-        }
+        StartCoroutine(LateStart());
 	}
 	
 	// Update is called once per frame
@@ -70,6 +61,31 @@ public class InventoryController : MonoBehaviour {
                 selectedItem.SetParent(selectedSlot);
             }
             selectedItem.localPosition = Vector3.zero;
+        }
+    }
+
+    IEnumerator LateStart()
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        localPlayer = GameObject.FindGameObjectWithTag("LocalPlayer");
+        if (localPlayer == null)
+        {
+            Debug.LogError("Could not find a local player!");
+            yield return null;
+        }
+
+
+        inventorySlots = GameObject.FindGameObjectsWithTag("ItemSlot");
+
+        for (int i = 0; i < localPlayer.GetComponent<Player>().inventory.Count; i++)
+        {
+            GameObject newItem = Instantiate(itemPrefab) as GameObject;
+            newItem.transform.SetParent(inventorySlots[i].transform, false);
+            newItem.GetComponent<ItemLogic>().curItem = ItemDatabase_OLD.itemList[i];
+            newItem.name = ItemDatabase_OLD.itemList[i].itemName;
+            NetworkServer.Spawn(newItem);
+
         }
     }
 }

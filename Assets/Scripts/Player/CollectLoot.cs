@@ -25,7 +25,7 @@ public class CollectLoot : NetworkBehaviour {
                     if(Vector3.Distance(hit.transform.position, player.transform.position) <= 5)
                     {
                         Debug.Log("Picked up " + hit.transform.name);
-                        ItemDatabase._instance.RpcAddItem(hit.transform.gameObject.GetComponent<Item>());
+                        ItemDatabase_OLD._instance.RpcAddItem(hit.transform.gameObject.GetComponent<Item>());
                         Destroy(hit.transform.gameObject, 0.1f);
                     }
                     else

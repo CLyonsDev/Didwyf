@@ -3,12 +3,12 @@ using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
 
-public class ItemDatabase : NetworkBehaviour
+public class ItemDatabase_OLD : NetworkBehaviour
 {
 
     public Sprite[] sprites;
 
-    public static ItemDatabase _instance;
+    public static ItemDatabase_OLD _instance;
 
     public static List<Item> itemList = new List<Item>();
     public static List<Item> sortedItemList = new List<Item>();
@@ -38,7 +38,7 @@ public class ItemDatabase : NetworkBehaviour
         Item i5 = new Item("Sharp Knife", Item.Type.Weapon, "Common", 20, 0, 10, 5);
         itemList.Add(i5);
         */
-        RpcSortAllItems();
+        //RpcSortAllItems();
     }
 
     public void RpcAddItem(Item item)
