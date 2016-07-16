@@ -16,6 +16,7 @@ public class InventoryUIManager : NetworkBehaviour {
 
     int loopCount;
 
+
     // Use this for initialization
     void Start () {
 

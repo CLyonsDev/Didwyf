@@ -10,6 +10,9 @@ public class Player : CharacterBase
 
     public GameObject gameManager;
 
+    public GameObject canvasGO;
+
+    bool canvasEnabled = true;
 
     public List<ItemEntry> inventory = new List<ItemEntry>();
 
@@ -20,6 +23,9 @@ public class Player : CharacterBase
         playerName = ("Player " + Random.Range(0, 10000).ToString());
         transform.name = playerName;
 
+        canvasGO = GameObject.Find("Canvas");
+
+        canvasGO.SetActive(false);
         //RpcCalcStats();
         //Debug.Log("RpcCalcStats");
     }
@@ -46,18 +52,18 @@ public class Player : CharacterBase
 
                 RequestItem(GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId);
             }
-
-
-            /*GameObject gm = GameObject.Find("GameManager");
-
-            gm.GetComponent<ItemManager>().CmdRequestItem(GetComponent<NetworkIdentity>().netId, 0);
-            gm.GetComponent<ItemManager>().CmdRequestItem(GetComponent<NetworkIdentity>().netId, 1);
-            gm.GetComponent<ItemManager>().CmdRequestItem(GetComponent<NetworkIdentity>().netId, 2);
-            gm.GetComponent<ItemManager>().CmdRequestItem(GetComponent<NetworkIdentity>().netId, 3);
-            gm.GetComponent<ItemManager>().CmdRequestItem(GetComponent<NetworkIdentity>().netId, 4);*/
-
-
         }
+
+        if(Input.GetKeyDown(KeyCode.I))
+        {
+            canvasEnabled = !canvasEnabled;
+            SwitchCanvasEnabled();
+        }
+    }
+
+    void SwitchCanvasEnabled()
+    {
+        canvasGO.SetActive(canvasEnabled);
     }
 
     void RequestItem(NetworkInstanceId playerID, NetworkInstanceId objectID)
