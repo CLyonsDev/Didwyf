@@ -3,9 +3,8 @@ using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
 
-public class Player : CharacterBase
+public class Player : NetworkBehaviour
 {
-
     public string playerName;
 
     public GameObject gameManager;
@@ -19,27 +18,43 @@ public class Player : CharacterBase
     // Use this for initialization
     void Start()
     {
-
-        playerName = ("Player " + Random.Range(0, 10000).ToString());
-        transform.name = playerName;
+        if (!isLocalPlayer)
+            return;
 
         canvasGO = GameObject.Find("Canvas");
 
         canvasGO.SetActive(false);
-        //RpcCalcStats();
+
         //Debug.Log("RpcCalcStats");
+
+        GetComponent<CharacterBase>().CmdRandomizeStats(GetComponent<NetworkIdentity>().netId);
+        GetComponent<CharacterBase>().CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
     }
 
     void Update()
     {
+        if (!isLocalPlayer)
+            return;
+
         if (Input.GetKeyDown(KeyCode.B))
         {
-            RpcTakeDamage(5, "Environment");
+            //CmdTakeDamage(5, "Environment");
+            GetComponent<CharacterBase>().CmdReportDamage(GetComponent<NetworkIdentity>().netId, 5, "Environment");
+        }
+
+        if(Input.GetKeyDown(KeyCode.V))
+        {
+            GetComponent<CharacterBase>().CmdHeal(5, "An Omniscient Deity");
         }
 
         if (Input.GetKeyDown(KeyCode.N))
         {
-            RpcRespawn();
+            GetComponent<CharacterBase>().CmdRequestRespawn(GetComponent<NetworkIdentity>().netId);
+        }
+
+        if(Input.GetKeyDown(KeyCode.C))
+        {
+            GetComponent<CharacterBase>().RandomizeStats();
         }
 
         if (Input.GetKeyDown(KeyCode.G))
@@ -54,10 +69,22 @@ public class Player : CharacterBase
             }
         }
 
+        if(Input.GetKeyDown(KeyCode.L))
+        {
+            GetComponent<CharacterBase>().CmdAddStats(GetComponent<NetworkIdentity>().netId, 100, 0, 0, 0);
+        }
+
         if(Input.GetKeyDown(KeyCode.I))
         {
             canvasEnabled = !canvasEnabled;
             SwitchCanvasEnabled();
+        }
+        
+        //We left off here. We were going to make it so that you can right-click loot, and it does the above logic to grant the player that item.
+        if(Input.GetMouseButtonDown(1))
+        {
+            Debug.Log("Looking for loot");
+
         }
     }
 
