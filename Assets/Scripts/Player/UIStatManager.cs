@@ -28,6 +28,8 @@ public class UIStatManager : MonoBehaviour {
     {
         if(healthImage != null)
             healthImage.fillAmount = 1;
+
+        GameObject.Find("Canvas").transform.position = Vector3.zero;
     }
 	
 	// This is really sloppy, we can clean it up later
