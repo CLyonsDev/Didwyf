@@ -41,7 +41,7 @@ public class CamMovement : NetworkBehaviour {
             transform.position = Vector3.Lerp(pos, PlayerPos, 4.5f * Time.deltaTime);
         }else if(Input.GetAxis("Mouse ScrollWheel") < 0)
         {
-            transform.position = Vector3.Lerp(pos, startPos, 4.5f * Time.deltaTime);
+            transform.position = Vector3.Lerp(pos, startPos, 8.5f * Time.deltaTime);
         }
 
         /*if(Input.GetMouseButtonDown(2))

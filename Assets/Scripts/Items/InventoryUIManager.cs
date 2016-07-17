@@ -19,6 +19,8 @@ public class InventoryUIManager : NetworkBehaviour {
 
     // Use this for initialization
     void Start () {
+        if (!isLocalPlayer)
+            return;
 
         loopCount = 0;
 
@@ -37,6 +39,8 @@ public class InventoryUIManager : NetworkBehaviour {
             GrabInventorySlots();
             RefreshInventory();
         }
+        if (inventorySlots.Count == 0)
+            GrabInventorySlots();
 	}
 
     void GrabInventorySlots()
