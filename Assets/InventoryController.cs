@@ -22,11 +22,16 @@ public class InventoryController : NetworkBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        //******************//
-        //  Click Pressed   //
-        //******************//
+        if (localPlayer == null)
+        {
+            localPlayer = GameObject.FindGameObjectWithTag("LocalPlayer");
+        }
 
-        if (Input.GetMouseButtonDown(0) && selectedItem != null)
+            //******************//
+            //  Click Pressed   //
+            //******************//
+
+            if (Input.GetMouseButtonDown(0) && selectedItem != null)
         {
             originalSlot = selectedItem.parent;
             //selectedItem.parent = selectedItem.parent.parent;
@@ -52,7 +57,7 @@ public class InventoryController : NetworkBehaviour {
             else
             {
                 //Swap item positions
-                if(selectedSlot.childCount > 0)
+                if(selectedSlot.childCount > 0 && selectedSlot.GetChild(0).GetComponent<Text>() == null)
                 {
                     selectedSlot.GetChild(0).SetParent(originalSlot.transform);
                     foreach (Transform t in originalSlot)
@@ -61,6 +66,13 @@ public class InventoryController : NetworkBehaviour {
                 selectedItem.SetParent(selectedSlot);
             }
             selectedItem.localPosition = Vector3.zero;
+
+            if (selectedSlot.transform.tag == "Trash")
+            {
+                Debug.LogWarning("Destroying Item");
+                localPlayer.GetComponent<Player>().RemoveItem(localPlayer.GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, selectedItem.GetComponent<NewItem>().currentItem);
+                Destroy(selectedItem.gameObject);
+            }
         }
     }
 

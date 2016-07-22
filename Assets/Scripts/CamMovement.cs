@@ -25,13 +25,19 @@ public class CamMovement : NetworkBehaviour {
 	void Update ()
     {
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (player == null)
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            StartCoroutine(LookForPlayer());
+            return;
+
         }
 
-        if (player == null)
-            return;
+        /*if (Input.GetKeyDown(KeyCode.R))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }*/
+
+
         PlayerPos = player.transform.position;
         pos = transform.position;
 

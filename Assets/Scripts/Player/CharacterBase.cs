@@ -36,9 +36,16 @@ public class CharacterBase : NetworkBehaviour {
 
     void Start()
     {
+        if (!isLocalPlayer)
+            return;
+
         playerName = ("Player " + Random.Range(0, 10000).ToString());
         transform.name = playerName;
         meshRenderers = GetComponentsInChildren<MeshRenderer>();
+
+        //Debug.LogWarning("Trying to randomize our stats. Our player's NetworkID is " + GetComponent<NetworkIdentity>().netId);
+
+        CmdRandomizeStats(GetComponent<NetworkIdentity>().netId);
 
         //RandomizeStats();
         //GenerateStats();
@@ -47,28 +54,28 @@ public class CharacterBase : NetworkBehaviour {
 
     void UpdateStr(int str)
     {
-        Debug.Log("Updating Stats");
+        //Debug.Log("Updating Stats");
         strength = str;
         GenerateStats();
     }
 
     void UpdateDex(int dex)
     {
-        Debug.Log("Updating Stats");
+        //Debug.Log("Updating Stats");
         dexterity = dex;
         GenerateStats();
     }
 
     void UpdateInt(int ints)
     {
-        Debug.Log("Updating Stats");
+        //Debug.Log("Updating Stats");
         intelligence = ints;
         GenerateStats();
     }
 
     void UpdateVit(int vit)
     {
-        Debug.Log("Updating Stats");
+        //Debug.Log("Updating Stats");
         vitality = vit;
         GenerateStats();
     }
@@ -82,8 +89,10 @@ public class CharacterBase : NetworkBehaviour {
     [ClientRpc]
     public void RpcRandomizeStats(NetworkInstanceId playerID)
     {
-        GameObject player = NetworkServer.FindLocalObject(playerID);
+
+        GameObject player = ClientScene.FindLocalObject(playerID);
         CharacterBase cb = player.GetComponent<CharacterBase>();
+        Debug.LogWarning("Cound not find a player with the NetworkInstanceID of " + playerID);
 
         cb.strength = Random.Range(statMin, statMax);
         cb.dexterity = Random.Range(statMin, statMax);
@@ -94,7 +103,11 @@ public class CharacterBase : NetworkBehaviour {
     public void RandomizeStats()
     {
         if (!isLocalPlayer)
-            return;
+        {
+            Debug.Log("!islocalplayer");
+                return;
+        }
+            
 
         strength = Random.Range(statMin, statMax);
         dexterity = Random.Range(statMin, statMax);
@@ -105,13 +118,14 @@ public class CharacterBase : NetworkBehaviour {
     [Command]
     public void CmdGenerateStats(NetworkInstanceId playerID)
     {
+
         RpcGenerateStats(playerID);
     }
 
     [ClientRpc]
     public void RpcGenerateStats(NetworkInstanceId playerID)
     {
-        GameObject player = NetworkServer.FindLocalObject(playerID);
+        GameObject player = ClientScene.FindLocalObject(playerID);
         CharacterBase cb = player.GetComponent<CharacterBase>();
 
         cb.maxHealth = cb.vitality + (cb.strength / 2);
@@ -123,20 +137,35 @@ public class CharacterBase : NetworkBehaviour {
         cb.totalDamageMin = cb.weaponDamageMin + cb.strength;
         cb.totalDamageMax = cb.weaponDamageMax + cb.strength;
 
-        Debug.Log(cb.currentHealth + " / " + cb.maxHealth);
-        Debug.Log(cb.evadeChance);
-        Debug.Log(cb.armorRating);
+        //Debug.Log(cb.currentHealth + " / " + cb.maxHealth);
+        //Debug.Log(cb.evadeChance);
+        //Debug.Log(cb.armorRating);
+    }
+
+    private void GenerateStatsNoNetworking()
+    {
+        maxHealth = vitality + (strength / 2);
+        evadeChance = dexterity + (intelligence / 2);
+        armorRating = evadeChance;
+
+        currentHealth = maxHealth;
+
+        totalDamageMin = weaponDamageMin + strength;
+        totalDamageMax = weaponDamageMax + strength;
     }
 
     public void GenerateStats()
     {
-        CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
+        Debug.Log("GenerateStats()");
+        //CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
+        GenerateStatsNoNetworking();
     }
 
 
     [Command]
     public void CmdReportDamage(NetworkInstanceId playerID, float damage, string source)
     {
+        Debug.Log("[COMMAND] NetID " + playerID + " has been dealt " + damage + " damage by " + source + ".");
         GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
         targetPlayer.GetComponent<CharacterBase>().TakeDamage(playerID, damage, "Environment");
     }
@@ -220,9 +249,12 @@ public class CharacterBase : NetworkBehaviour {
             meshRenderer.enabled = true;
         }
 
-        GetComponent<Movement>().enabled = true;
-        GetComponent<Rotation>().enabled = true;
-        Debug.Log("Re-enabled scripts.");
+        if(isLocalPlayer)
+        {
+            GetComponent<Movement>().enabled = true;
+            GetComponent<Rotation>().enabled = true;
+            Debug.Log("Re-enabled scripts.");
+        }
 
         currentHealth = maxHealth;
         isDead = false;

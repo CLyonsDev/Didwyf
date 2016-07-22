@@ -9,9 +9,9 @@ public class Player : NetworkBehaviour
 
     public GameObject gameManager;
 
-    public GameObject canvasGO;
+    public GameObject inventoryUIGO, dummyGO;
 
-    bool canvasEnabled = true;
+    bool canvasEnabled = false;
 
     public List<ItemEntry> inventory = new List<ItemEntry>();
 
@@ -19,16 +19,21 @@ public class Player : NetworkBehaviour
     void Start()
     {
         if (!isLocalPlayer)
+        {
+            Debug.LogWarning("Not Local Player");
             return;
+        }
 
-        canvasGO = GameObject.Find("Canvas");
+        inventoryUIGO = GameObject.Find("InventoryScreen");
 
-        canvasGO.SetActive(false);
-
+        //StartCoroutine(DisableinventoryUIGOAfterADelay());
         //Debug.Log("RpcCalcStats");
 
-        GetComponent<CharacterBase>().CmdRandomizeStats(GetComponent<NetworkIdentity>().netId);
-        GetComponent<CharacterBase>().CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
+        /*For some reason it can't find the netID of the player fml*/
+        //GetComponent<CharacterBase>().CmdRandomizeStats(GetComponent<NetworkIdentity>().netId);
+        //GetComponent<CharacterBase>().CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
+
+        //StartCoroutine(DisableinventoryUIGOAfterADelay());
     }
 
     void Update()
@@ -36,9 +41,15 @@ public class Player : NetworkBehaviour
         if (!isLocalPlayer)
             return;
 
+        if(inventoryUIGO == null)
+        {
+            inventoryUIGO = GameObject.Find("InventoryScreen");          
+        }
+
         if (Input.GetKeyDown(KeyCode.B))
         {
             //CmdTakeDamage(5, "Environment");
+            Debug.Log("Dealing 5 damage to NetID " + GetComponent<NetworkIdentity>().netId);
             GetComponent<CharacterBase>().CmdReportDamage(GetComponent<NetworkIdentity>().netId, 5, "Environment");
         }
 
@@ -65,7 +76,9 @@ public class Player : NetworkBehaviour
             {
                 Debug.Log("You are the player.");
 
-                RequestItem(GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId);
+                GameObject dummy = Instantiate(dummyGO, Vector3.zero, Quaternion.identity) as GameObject;
+                RequestItem(GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, dummy.GetComponent<NetworkIdentity>().netId, Random.Range(0, XMLManager.ins.itemDB.list.Count ));
+                StartCoroutine(RefreshInventory());
             }
         }
 
@@ -84,55 +97,90 @@ public class Player : NetworkBehaviour
         if(Input.GetMouseButtonDown(1))
         {
             Debug.Log("Looking for loot");
-
+            RaycastHit hit;
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity) && hit.transform.tag == "Loot")
+            {
+                int index = hit.transform.gameObject.GetComponent<CollectableItem>().itemIndex;
+                RequestItem(GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, hit.transform.gameObject.GetComponent<NetworkIdentity>().netId,index);
+            }
         }
     }
 
     void SwitchCanvasEnabled()
     {
-        canvasGO.SetActive(canvasEnabled);
+        inventoryUIGO.SetActive(canvasEnabled);
     }
 
-    void RequestItem(NetworkInstanceId playerID, NetworkInstanceId objectID)
+    void RequestItem(NetworkInstanceId playerID, NetworkInstanceId objectID, NetworkInstanceId itemGOID, int itemIndex)
     {
+        if (!isLocalPlayer)
+            return;
+
         Debug.Log("Here goes nothing...");
         if (!Network.isServer)
         {
             Debug.LogWarning("Not Server.");
-            CmdRequestItem(playerID, objectID);
+            CmdRequestItem(playerID, objectID, itemGOID, itemIndex);
         }
         else
         {
             Debug.LogError("Not Client.");
-            RpcRequestItem(playerID, objectID);
+            RpcRequestItem(playerID, objectID, itemGOID, itemIndex);
         }
 
-        StartCoroutine(RefreshInventory(objectID));
+        //StartCoroutine(RefreshInventory(objectID));
+    }
+
+    public void RemoveItem(NetworkInstanceId playerID, NetworkInstanceId gamemanagerID, ItemEntry itemToRemove)
+    {
+        Debug.Log("Requesting to remove the item " + itemToRemove.itemName + ".");
+        int index = inventory.IndexOf(itemToRemove);
+        CmdRemoveItem(playerID, gamemanagerID, index);
+    }
+
+    [Command]
+    void CmdRemoveItem(NetworkInstanceId playerID, NetworkInstanceId gamemanagerID, int index)
+    {
+        Debug.Log("Asking to remove.");
+        ItemManager im = NetworkServer.FindLocalObject(gamemanagerID).GetComponent<ItemManager>();
+
+        if(im != null)
+        {
+            Debug.Log("Server has been asked to remove the item.");
+            im.RemoveItem(GetComponent<NetworkIdentity>().netId, index);
+        }
     }
 
 
     [Command]
-    void CmdRequestItem(NetworkInstanceId playerID, NetworkInstanceId objectID)
+    void CmdRequestItem(NetworkInstanceId playerID, NetworkInstanceId gameManagerID, NetworkInstanceId itemGOID, int itemIndex)
     {
-        Debug.Log("Requesting an item from " + objectID + " for player " + playerID);
+        Debug.Log("Requesting an item from " + gameManagerID + " for player " + playerID);
 
-        ItemManager im = NetworkServer.FindLocalObject(objectID).GetComponent<ItemManager>();
+        GameObject player = NetworkServer.FindLocalObject(playerID);
+
+        GameObject gameManager = NetworkServer.FindLocalObject(gameManagerID);
+
+        ItemManager im = gameManager.GetComponent<ItemManager>();
+        InventoryUIManager uim = gameManager.GetComponent<InventoryUIManager>();
 
         if (im != null)
         {
             Debug.Log("Server has been asked for the item.");
-            im.RequestItem(GetComponent<NetworkIdentity>().netId, Random.Range(0, XMLManager.ins.itemDB.list.Count - 1));
-            //StartCoroutine(RefreshInventory(objectID));
+            im.RequestItem(GetComponent<NetworkIdentity>().netId, itemGOID, itemIndex);
+            //uim.RefreshInventory();
+            //player.GetComponent<Player>().StartCoroutine(RefreshInventory(objectID));
+            //player.GetComponent<Player>().StartCoroutine(RefreshInventory());
             //gm.GetComponent<InventoryUIManager>().CmdRefreshInventory();
         }
         else
         {
-            Debug.LogError("Could not find the Item Manager on object " + objectID + " are you sure that the ID is correct?");
+            Debug.LogError("Could not find the Item Manager on object " + gameManagerID + " are you sure that the ID is correct?");
         }
     }
 
     [ClientRpc]
-    void RpcRequestItem(NetworkInstanceId playerID, NetworkInstanceId objectID)
+    void RpcRequestItem(NetworkInstanceId playerID, NetworkInstanceId objectID, NetworkInstanceId itemGOID, int itemIndex)
     {
         Debug.Log("Requesting an item from " + objectID + " for player " + playerID);
 
@@ -141,38 +189,50 @@ public class Player : NetworkBehaviour
         if (im != null)
         {
             Debug.Log("Server has been asked for the item.");
-            im.RequestItem(GetComponent<NetworkIdentity>().netId, 0);
-
+            im.RequestItem(GetComponent<NetworkIdentity>().netId, itemGOID, itemIndex);
+            StartCoroutine(RefreshInventory());
             //gm.GetComponent<InventoryUIManager>().CmdRefreshInventory();
         }
         else
         {
-            Debug.LogError("Could not find ItemManager or InventoryUIManager!");
-            return;
+            Debug.LogError("Could not find the Item Manager on object " + objectID + " are you sure that the ID is correct?");
         }
     }
 
-    IEnumerator RefreshInventory(NetworkInstanceId objectID)
+    /*IEnumerator RefreshInventory(NetworkInstanceId objectID)
     {
-        Debug.Log("RefreshInventory");
         //InventoryUIManager ui;
         yield return new WaitForSeconds(0.1f);
 
         if (!Network.isServer)
         {
             ClientScene.FindLocalObject(objectID).GetComponent<InventoryUIManager>().RefreshInventory();
-            Debug.Log("Found UIManager.");
 
         }
         else
         {
             ClientScene.FindLocalObject(objectID).GetComponent<InventoryUIManager>().RefreshInventory();
-            Debug.Log("Found UIManager.");
-
         }
+        //ui.RefreshInventory();
+        
+    }*/
 
-        Debug.Log("Refreshing...");
+    IEnumerator RefreshInventory()
+    {
+        //InventoryUIManager ui;
+
+        if (!isLocalPlayer)
+            yield return null;
+
+        yield return new WaitForSeconds(0.1f);
+        GameObject.Find("GameManager").GetComponent<InventoryUIManager>().RefreshInventory();
         //ui.RefreshInventory();
 
     }
+
+    /*IEnumerator DisableinventoryUIGOAfterADelay()
+    {
+        yield return new WaitForSeconds(0.15f);
+        inventoryUIGO.SetActive(false);
+    }*/
 }

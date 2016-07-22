@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -16,11 +17,13 @@ public class InventoryUIManager : NetworkBehaviour {
 
     int loopCount;
 
+    /*[SyncVar]*/ public int openSlots = -1;
+
 
     // Use this for initialization
     void Start () {
-        if (!isLocalPlayer)
-            return;
+
+        openSlots = inventorySlots.Count;
 
         loopCount = 0;
 
@@ -33,7 +36,8 @@ public class InventoryUIManager : NetworkBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	    if(localPlayer == null)
+
+        if (localPlayer == null)
         {
             localPlayer = GameObject.FindGameObjectWithTag("LocalPlayer");
             GrabInventorySlots();
@@ -41,50 +45,49 @@ public class InventoryUIManager : NetworkBehaviour {
         }
         if (inventorySlots.Count == 0)
             GrabInventorySlots();
-	}
+        if (openSlots == -1)
+        {
+            if (inventorySlots.Count == 0)
+                openSlots = -1;
+            else
+            {
+                openSlots = inventorySlots.Count;
+                RefreshInventory();
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.H))
+            RefreshInventory();
+    }
 
     void GrabInventorySlots()
     {
+        inventorySlots.Clear();
         inventorySlots.AddRange(GameObject.FindGameObjectsWithTag("ItemSlot"));
-        inventorySlots.Sort(delegate (GameObject i1, GameObject i2)
-        {
-            return i1.name.CompareTo(i2.name);
-        });
+        openSlots = inventorySlots.Count;
+        //inventorySlots.Sort(IComparer<>);
     }
-
-    /*public void RefreshInventory()
-    {
-        if (!Network.isServer)
-            CmdRefreshInventory();
-        else
-            RpcRefreshInventory();
-    }*/
 
     public void RefreshInventory()
     {
+        /*if (openSlots <= 0)
+        {
+            Debug.LogError("No open slots. Cannot Refresh inventory!");
+            return;
+        }*/
+
         playerInv = localPlayer.GetComponent<Player>().inventory;
         Debug.Log("Requesting an Inventory Update.");
+        openSlots--;
         PopulateInventory();
     }
 
     public void PopulateInventory()
     {
-        /*for (int i = 0; i < playerInv.Count; i++)
-        {
-            if (inventorySlots[i].transform.childCount > 0)
-                Destroy(inventorySlots[i].transform.GetChild(0).gameObject);
-
-            Sprite itemSprite = Resources.Load<Sprite>(playerInv[i].spritePath);
-            GameObject newItem = Instantiate(itemPrefab) as GameObject;
-            newItem.transform.SetParent(inventorySlots[i].transform, false);
-            newItem.GetComponent<NewItem>().itemSprite = itemSprite;
-            newItem.GetComponent<NewItem>().currentItem = playerInv[i];
-        }*/
-
         if (playerInv.Count == 0)
             return;
 
-        slotChoice = playerInv.Count - 1;
+        slotChoice = 0;
 
         if(loopCount >= inventorySlots.Count + 1)
         {
@@ -95,11 +98,10 @@ public class InventoryUIManager : NetworkBehaviour {
         while (inventorySlots[slotChoice].transform.childCount != 0)
         {
             loopCount++;
-            Debug.Log(slotChoice);
-            //Debug.Log("Slot " + inventorySlots[slotChoice] + " has " + inventorySlots[slotChoice].transform.childCount + " children.");
-            slotChoice = Random.Range(0, inventorySlots.Count - 1);
-            Debug.Log(slotChoice);
+            slotChoice++;
         }
+
+        loopCount = 0;
 
         Sprite itemSprite = Resources.Load<Sprite>(playerInv[playerInv.Count - 1].spritePath);
         GameObject newItem = Instantiate(itemPrefab) as GameObject;

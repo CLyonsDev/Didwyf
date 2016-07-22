@@ -6,9 +6,11 @@ public class CanvasLogic : NetworkBehaviour {
 
 	void Start () {
         if (!isClient)
-            Destroy(gameObject);
+            Destroy(transform.parent.gameObject);
 
-        transform.localPosition = new Vector3(0,0,0);
-        transform.FindChild("InventoryPanel").localPosition = new Vector3(249.35f, 166, 0);
+            transform.localPosition = new Vector3(0, 0, 0);
+            transform.FindChild("InventoryPanel").localPosition = new Vector3(249.35f, 166, 0);
+
+        
     }
 }

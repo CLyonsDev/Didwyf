@@ -4,13 +4,14 @@ using System.Collections;
 
 public class CollectableItem : NetworkBehaviour {
 
+    public int itemIndex;
+
+    [SerializeField]
+    ItemEntry item;
+
 	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+	void Start ()
+    {
+        item = XMLManager.ins.itemDB.list[itemIndex];
+    }
 }

@@ -1,0 +1,29 @@
+*Connecting takes some time. Give it 5-10 seconds before you freak out*
+
+New Stuff:
+
+- Press 'I' to toggle the inventory screen
+	-Might have to press more that once, known bug.
+
+- Character attributes are randomly generated
+- AC is Dex + 1/2 Int
+- Health is Vit + 1/2 Str
+- Dmg is Strength + Weapon Damage
+- Weapons have a set range of damage
+	- This one is set from 1-12 to emulate a d12, but the range can be anything
+- Changing stats updates the info in real time
+
+- B to take damage (5)
+- V to heal (5)
+- N to respawn if dead
+
+- Press 'G' to give yourself a random item from the database.
+	- The slot they pick is random for now, but later it will be chronological.
+	- These items have a variety of stats (even though you can't see them)!
+	- Items can be dragged into slots, and dragging an item onto another one swaps their places
+
+
+
+Next Up:
+- Implement Item Sacrificing
+- Implement Stat Changers (Mention potion)

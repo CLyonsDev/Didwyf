@@ -4,7 +4,9 @@
     <ItemEntry>
       <itemName>Steel Sword</itemName>
       <itemID>0</itemID>
-      <damage>10</damage>
+      <damageMin>10</damageMin>
+      <damageMax>20</damageMax>
+      <critModifier>5</critModifier>
       <armor>0</armor>
       <type>Weapon</type>
       <value>25</value>
@@ -14,7 +16,9 @@
     <ItemEntry>
       <itemName>Leather Gauntlet</itemName>
       <itemID>1</itemID>
-      <damage>0</damage>
+      <damageMin>0</damageMin>
+      <damageMax>0</damageMax>
+      <critModifier>0</critModifier>
       <armor>10</armor>
       <type>Armor</type>
       <value>10</value>
@@ -24,7 +28,9 @@
     <ItemEntry>
       <itemName>Health Potion</itemName>
       <itemID>2</itemID>
-      <damage>0</damage>
+      <damageMin>0</damageMin>
+      <damageMax>0</damageMax>
+      <critModifier>0</critModifier>
       <armor>0</armor>
       <type>Consumable</type>
       <value>100</value>
@@ -34,7 +40,9 @@
     <ItemEntry>
       <itemName>Simple Knife</itemName>
       <itemID>3</itemID>
-      <damage>5</damage>
+      <damageMin>1</damageMin>
+      <damageMax>5</damageMax>
+      <critModifier>2</critModifier>
       <armor>0</armor>
       <type>Weapon</type>
       <value>5</value>
@@ -44,7 +52,9 @@
     <ItemEntry>
       <itemName>Mysterious Stone</itemName>
       <itemID>4</itemID>
-      <damage>0</damage>
+      <damageMin>0</damageMin>
+      <damageMax>0</damageMax>
+      <critModifier>0</critModifier>
       <armor>0</armor>
       <type>Misc</type>
       <value>0</value>

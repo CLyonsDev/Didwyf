@@ -5,25 +5,48 @@ using System.Collections;
 public class ItemManager : NetworkBehaviour {
 
 
-    public void RequestItem(NetworkInstanceId playerID, int itemID)
+    public void RequestItem(NetworkInstanceId playerID, NetworkInstanceId itemGOID, int itemID)
     {
-        if (!Network.isServer)
+        if (Network.isClient)
         {
+            if(GetComponent<InventoryUIManager>().openSlots <= 0)
+            {
+                Debug.LogError("Inventory is full, could not give item.");
+                return;
+            }
             Debug.LogWarning("NotServerItemManager");
-            CmdRequestItem(playerID, itemID);
-            RpcRequestItem(playerID, itemID);
+            //CmdRequestItem(playerID, itemID);
+            RpcRequestItem(playerID, itemGOID, itemID);
         }
         else   
         {
             Debug.LogWarning("ServerItemManager");
-            RpcRequestItem(playerID, itemID);
+            RpcRequestItem(playerID, itemGOID, itemID);
         }
+    }
+
+    public void RemoveItem(NetworkInstanceId playerID, int index)
+    {
+        if(!Network.isServer)
+        {
+            GetComponent<InventoryUIManager>().openSlots++;
+            RpcRemoveItem(playerID, index);
+        }
+    }
+
+    [ClientRpc]
+    void RpcRemoveItem(NetworkInstanceId playerID, int index)
+    {
+        GameObject player = ClientScene.FindLocalObject(playerID);
+        Debug.Log("Server is removing item.");
+        player.GetComponent<Player>().inventory.RemoveAt(index);
+
     }
 
 
     //A client sided command that requests an item from the server
     [ClientRpc]
-    public void RpcRequestItem(NetworkInstanceId playerID, int itemID)
+    public void RpcRequestItem(NetworkInstanceId playerID, NetworkInstanceId itemGOID, int itemID)
     {
 
         GameObject player = ClientScene.FindLocalObject(playerID);
@@ -41,7 +64,11 @@ public class ItemManager : NetworkBehaviour {
         //CmdSendItemToPlayer(playerID, itemID);
 
         player.GetComponent<Player>().inventory.Add(XMLManager.ins.itemDB.list[itemID]);
+        if(itemGOID != null)
+            NetworkServer.Destroy(ClientScene.FindLocalObject(itemGOID));
         Debug.Log("Sent item to player.");
+
+        //GameObject.Find("GameManager").GetComponent<InventoryUIManager>().RefreshInventory();
     }
 
     [Command]

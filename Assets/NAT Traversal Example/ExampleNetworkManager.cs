@@ -29,10 +29,54 @@ public class ExampleNetworkManager : NATTraversal.NetworkManager
 #else
     public override void OnMatchList(ListMatchResponse matchList)
     {
-        if (!matchList.success || matchList.matches.Count == 0) return;
+        if (!matchList.success)
+        {
+            Debug.Log("Failed to retrieve match list");
+            return;
+        }
+        if (matchList.matches.Count == 0)
+        {
+            Debug.Log("Match list is empty");
+            return;
+        }
 
-        MatchDesc match = matchList.matches[0];
+        MatchDesc match = null;
+
+        if (natHelper.guid != 0)
+        {
+            // If we have a guid we can use it to make sure we don't
+            // try and join our own old match. This can happen when quickly switching
+            // from hosting to joining because old matches are not cleaned up immediately
+            // and there's no way to be notified when they are cleaned up
+            foreach (MatchDesc m in matchList.matches)
+            {
+                string[] parts = m.name.Split(':');
+                ulong hostGUID;
+                ulong.TryParse(parts[parts.Length - 1], out hostGUID);
+                if (hostGUID == natHelper.guid)
+                {
+                    Debug.Log("Not joining old match");
+                }
+                else
+                {
+                    match = m;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            match = matchList.matches[0];
+        }
+
+        if (match == null)
+        {
+            Debug.Log("Match list is empty");
+            return;
+        }
+
         matchID = match.networkId;
+
         StartClientAll(match);
     }
 #endif
@@ -51,52 +95,6 @@ public class ExampleNetworkManager : NATTraversal.NetworkManager
     }
 #endif
 
-    public void StartupHost()
-    {
-        if (matchMaker == null) matchMaker = gameObject.AddComponent<NetworkMatch>();
-
-        //matchMaker.CreateMatch("test", 10, true, "", OnMatchCreate);
-        StartHostAll("Hello World", 6);
-    }
-
-    public void JoinAnyGame()
-    {
-        matchMaker.ListMatches(0, 1, "", true, 0, 0, OnMatchList);
-    }
-
-    public void DisconnectFromServer()
-    {
-        if (matchID != NetworkID.Invalid && matchmakingNodeID != NodeID.Invalid)
-        {
-            if (NetworkServer.active)
-            {
-#if UNITY_5_4
-                matchMaker.DestroyMatch(matchID, 0, OnMatchDropped);
-#else
-                    matchMaker.DestroyMatch(matchID, OnMatchDropped);
-#endif
-            }
-            else
-            {
-#if UNITY_5_4
-                matchMaker.DropConnection(matchID, matchmakingNodeID, 0, OnMatchDropped);
-#else
-                    matchMaker.DropConnection(matchID, matchmakingNodeID, OnMatchDropped);
-#endif
-            }
-        }
-
-        if (NetworkServer.active)
-        {
-            NetworkServer.SetAllClientsNotReady();
-            StopHost();
-        }
-        else
-        {
-            StopClient();
-        }
-    }
-
     /*void OnGUI()
     {
         if (GUI.Button(new Rect(10, 10, 150, 100), "Host"))
@@ -111,9 +109,9 @@ public class ExampleNetworkManager : NATTraversal.NetworkManager
             if (matchMaker == null) matchMaker = gameObject.AddComponent<NetworkMatch>();
 
 #if UNITY_5_4
-            matchMaker.ListMatches(0, 1, "", true, 0, 0, OnMatchList);
+            matchMaker.ListMatches(0, 10, "", true, 0, 0, OnMatchList);
 #else
-            matchMaker.ListMatches(0, 1, "", OnMatchList);
+            matchMaker.ListMatches(0, 10, "", OnMatchList);
 #endif
         }
         if (GUI.Button(new Rect(10, 210, 150, 100), "Disconnect"))
@@ -160,6 +158,25 @@ public class ExampleNetworkManager : NATTraversal.NetworkManager
         GUI.Label(new Rect(10, 410, 300, 100), "Is connected to Facilitator: " + natHelper.isConnectedToFacilitator);
     }*/
 
+    public void StartupHost()
+    {
+        if (matchMaker == null) matchMaker = gameObject.AddComponent<NetworkMatch>();
+
+        //matchMaker.CreateMatch("test", 10, true, "", OnMatchCreate);
+        StartHostAll("Hello World", 6);
+    }
+
+    public void JoinAnyGame()
+    {
+        if (matchMaker == null) matchMaker = gameObject.AddComponent<NetworkMatch>();
+
+#if UNITY_5_4
+        matchMaker.ListMatches(0, 10, "", true, 0, 0, OnMatchList);
+#else
+            matchMaker.ListMatches(0, 10, "", OnMatchList);
+#endif
+    }
+
     public override void OnDoneConnectingToFacilitator(ulong guid)
     {
         if (guid == 0)
@@ -202,7 +219,8 @@ public class ExampleNetworkManager : NATTraversal.NetworkManager
         GameObject otherOb = Instantiate(otherObPrefab);
         NetworkServer.SpawnWithClientAuthority(otherOb, conn);
 
-        player.GetComponent<NATTraversalExamplePlayer>().RpcSetAssignedOb(otherOb.GetComponent<NetworkIdentity>().netId);
+        if(player.GetComponent<NATTraversalExamplePlayer>() != null)
+            player.GetComponent<NATTraversalExamplePlayer>().RpcSetAssignedOb(otherOb.GetComponent<NetworkIdentity>().netId);
     }
 
     public override void OnServerConnect(NetworkConnection conn)

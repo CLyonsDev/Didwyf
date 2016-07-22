@@ -6,6 +6,8 @@ public class UIStatManager : MonoBehaviour {
 
     public Image healthImage;
 
+    public GameObject attributeContainer;
+
     public Text ArmorClassText;
 
     public Text strengthText, dexterityText, intelText, vitalityText, damageText, characterName;
@@ -14,28 +16,26 @@ public class UIStatManager : MonoBehaviour {
 
     [SerializeField] float LerpSpeed = 4f;
 
-	// Use this for initialization
-	void Awake () {
-        //healthImage = GameObject.Find("HealthIcon").GetComponent<Image>();
-        //ArmorClassText = GameObject.Find("ArmorClassText").GetComponent<Text>();
+    void Start()
+    {
+
+        if (healthImage != null)
+            healthImage.fillAmount = 1;
+
+        ArmorClassText = GameObject.Find("ArmorClassText").GetComponent<Text>();
 
         GrabReferences();
 
         playerScript = GetComponent<CharacterBase>();
-	}
-
-    void Start()
-    {
-        if(healthImage != null)
-            healthImage.fillAmount = 1;
-
-        GameObject.Find("Canvas").transform.position = Vector3.zero;
     }
-	
-	// This is really sloppy, we can clean it up later
-	void Update () {
 
-        GrabReferences();
+    // This is really sloppy, we can clean it up later
+    void Update() {
+
+        if (playerScript == null || healthImage == null || ArmorClassText == null || characterName == null)
+        {
+            GrabReferences();
+        }
 
         if ((healthImage.fillAmount != (playerScript.currentHealth / playerScript.maxHealth)))
         {
@@ -76,25 +76,35 @@ public class UIStatManager : MonoBehaviour {
 
     private void GrabReferences()
     {
+        if(attributeContainer == null)
+        {
+            attributeContainer = GameObject.Find("AttributesPanel");
+        }
+
         if (healthImage == null)
         {
             healthImage = GameObject.Find("HealthIcon").GetComponent<Image>();
-            healthImage.fillAmount = 1;
+            if(healthImage != null)
+                healthImage.fillAmount = 1;
         }
+
+        if (attributeContainer == null)
+            return;
+
         if (ArmorClassText == null)
             ArmorClassText = GameObject.Find("ArmorClassText").GetComponent<Text>();
         if (playerScript == null)
             playerScript = GetComponent<CharacterBase>();
         if (strengthText == null)
-            strengthText = GameObject.Find("StrengthText").GetComponent<Text>();
+            strengthText = attributeContainer.transform.GetChild(0).transform.GetChild(0).GetComponent<Text>();
         if (dexterityText == null)
-            dexterityText = GameObject.Find("DexterityText").GetComponent<Text>();
+            dexterityText = attributeContainer.transform.GetChild(1).transform.GetChild(0).GetComponent<Text>();
         if (intelText == null)
-            intelText = GameObject.Find("IntelligenceText").GetComponent<Text>();
+            intelText = attributeContainer.transform.GetChild(2).transform.GetChild(0).GetComponent<Text>();
         if (vitalityText == null)
-            vitalityText = GameObject.Find("VitalityText").GetComponent<Text>();
+            vitalityText = attributeContainer.transform.GetChild(3).transform.GetChild(0).GetComponent<Text>();
         if(damageText == null)
-            damageText = GameObject.Find("DamageText").GetComponent<Text>();
+            damageText = attributeContainer.transform.GetChild(4).transform.GetChild(0).GetComponent<Text>();
         if (characterName == null)
             characterName = GameObject.Find("CharName").GetComponent<Text>();
     }

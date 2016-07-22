@@ -6,6 +6,7 @@ public class NATHelperTester : MonoBehaviour
 {
     public ushort directConnectPort = 7777;
     ulong hostGUID = 0;
+    string hostGUIDString = "";
 
     NATHelper natHelper;
 
@@ -13,6 +14,12 @@ public class NATHelperTester : MonoBehaviour
     {
         LogFilter.currentLogLevel = LogFilter.Debug;
         natHelper = GetComponent<NATHelper>();
+        
+        // Calling this early makes port forwarding go faster
+        natHelper.findNatDevice();
+
+        // Connect to Facilitator for punchthrough
+        natHelper.StartCoroutine(natHelper.connectToNATFacilitator());
     }
 
     void OnGUI()
@@ -27,7 +34,7 @@ public class NATHelperTester : MonoBehaviour
             if (GUI.Button(new Rect(10, 10, 150, 40), "Listen for Punchthrough"))
             {
                 Debug.Log("Listening for punchthrough");
-                StartCoroutine(natHelper.startListeningForPunchthrough(onHolePunchedServer));
+                natHelper.StartCoroutine(natHelper.startListeningForPunchthrough(onHolePunchedServer));
             }
         }
         else if (natHelper.isListeningForPunchthrough)
@@ -48,17 +55,26 @@ public class NATHelperTester : MonoBehaviour
             if (GUI.Button(new Rect(10, 60, 150, 40), "Punchthrough"))
             {
                 Debug.Log("Trying to punch through");
-                StartCoroutine(natHelper.punchThroughToServer(hostGUID, onHolePunchedClient));
+                natHelper.StartCoroutine(natHelper.punchThroughToServer(hostGUID, onHolePunchedClient));
             }
 
             GUI.Label(new Rect(170, 60, 170, 20), "Host GUID");
-            ulong.TryParse(GUI.TextField(new Rect(170, 80, 200, 20), hostGUID.ToString()), out hostGUID);
+            hostGUIDString = GUI.TextField(new Rect(170, 80, 200, 20), hostGUIDString);
+            ulong.TryParse(hostGUIDString, out hostGUID);
         }
 
         if (GUI.Button(new Rect(10, 110, 150, 40), "Forward port"))
         {
             Debug.Log("Forward port: " + directConnectPort);
             natHelper.mapPort(directConnectPort, directConnectPort, Protocol.Both, "NAT Test", onPortMappingDone);
+        }
+
+        if (natHelper.isForwardingPort || !natHelper.isDoneFindingNATDevice)
+        {
+            if (GUI.Button(new Rect(10, 160, 150, 40), "Stop port forwarding"))
+            {
+                natHelper.stopPortForwarding();
+            }
         }
     }
 
@@ -67,7 +83,7 @@ public class NATHelperTester : MonoBehaviour
         Debug.Log("Start a server listening on this port: " + portToListenOn);
     }
 
-    void onHolePunchedClient(int serverPort, int clientPort, bool success)
+    void onHolePunchedClient(int clientPort, int serverPort, bool success)
     {
         if (success)
         {

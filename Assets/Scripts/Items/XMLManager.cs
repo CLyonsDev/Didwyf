@@ -51,7 +51,9 @@ public class ItemEntry
     public string itemName;
     public int itemID;
 
-    public int damage;
+    public int damageMin;
+    public int damageMax;
+    public int critModifier;
     public int armor;
 
     public Type type;
