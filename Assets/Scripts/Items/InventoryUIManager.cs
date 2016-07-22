@@ -76,6 +76,9 @@ public class InventoryUIManager : NetworkBehaviour {
             return;
         }*/
 
+        if (localPlayer == null)
+            return;
+
         playerInv = localPlayer.GetComponent<Player>().inventory;
         Debug.Log("Requesting an Inventory Update.");
         openSlots--;

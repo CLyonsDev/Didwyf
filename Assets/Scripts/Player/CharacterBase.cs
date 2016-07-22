@@ -216,7 +216,7 @@ public class CharacterBase : NetworkBehaviour {
         Debug.Log(currentHealth + " / " + maxHealth);
         if(currentHealth <= 0)
         {
-            RpcDie();
+            RpcDie(GetComponent<NetworkIdentity>().netId);
         }
     }
 
@@ -241,9 +241,10 @@ public class CharacterBase : NetworkBehaviour {
 
         Debug.Log("RespawnPlayer has been called.");
 
-        GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
+        GameObject targetPlayer = ClientScene.FindLocalObject(playerID);
+        //MeshRenderer[] mr = targetPlayer.GetComponentsInChildren<MeshRenderer>();
 
-        foreach(Renderer meshRenderer in meshRenderers)
+        foreach(Renderer meshRenderer in targetPlayer.GetComponentsInChildren<MeshRenderer>())
         {
             Debug.Log("Enabling MeshRenderers.");
             meshRenderer.enabled = true;
@@ -261,48 +262,55 @@ public class CharacterBase : NetworkBehaviour {
     }
 
     [ClientRpc]
-    public void RpcDie()
+    public void RpcDie(NetworkInstanceId playerID)
     {
+
+        GameObject targetPlayer = ClientScene.FindLocalObject(playerID);
+
         currentHealth = 0;
         Debug.Log("DEAD");
         isDead = true;
 
-        foreach (MeshRenderer m in meshRenderers)
+        /*foreach (MeshRenderer m in meshRenderers)
         {
             m.enabled = false;
+        }*/
+
+        foreach(MeshRenderer mr in targetPlayer.GetComponentsInChildren<MeshRenderer>())
+        {
+            mr.enabled = false;
         }
 
-        GetComponent<Movement>().enabled = false;
-        GetComponent<Rotation>().enabled = false;
+        if(isLocalPlayer)
+        {
+            targetPlayer.GetComponent<Movement>().enabled = false;
+            targetPlayer.GetComponent<Rotation>().enabled = false;
+        } 
     }
 
     [ClientRpc]
-    public void RpcRespawn()
+    public void RpcRespawn(NetworkInstanceId playerID)
     {
-        if(isLocalPlayer)
+        GameObject player = ClientScene.FindLocalObject(playerID);
+
+        if (!isDead)
         {
-            if (!isDead)
-            {
-                Debug.LogError("Character " + gameObject.transform.name + " is trying to respawn but isn't dead!");
-                return;
-            }
-
-            Debug.Log("Respawned!");
-            isDead = false;
-
-            Renderer[] mr = GetComponentsInChildren<Renderer>();
-            {
-                foreach (Renderer m in mr)
-                {
-                    m.enabled = true;
-                }
-            }
-
-            GetComponent<Movement>().enabled = true;
-            GetComponent<Rotation>().enabled = true;
-
-            currentHealth = maxHealth;
+            Debug.LogError("Character " + gameObject.transform.name + " is trying to respawn but isn't dead!");
+            return;
         }
+
+        Debug.Log("Respawned!");
+        isDead = false;
+
+        foreach (MeshRenderer mr in meshRenderers)
+        {
+            mr.enabled = true;
+        }
+
+        player.GetComponent<Movement>().enabled = true;
+        player.GetComponent<Rotation>().enabled = true;
+
+        currentHealth = maxHealth;
     }
 
     [Command]

@@ -11,7 +11,7 @@ public class Player : NetworkBehaviour
 
     public GameObject inventoryUIGO, dummyGO;
 
-    bool canvasEnabled = false;
+    bool canvasEnabled = true;
 
     public List<ItemEntry> inventory = new List<ItemEntry>();
 
@@ -102,6 +102,7 @@ public class Player : NetworkBehaviour
             {
                 int index = hit.transform.gameObject.GetComponent<CollectableItem>().itemIndex;
                 RequestItem(GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, hit.transform.gameObject.GetComponent<NetworkIdentity>().netId,index);
+                StartCoroutine(RefreshInventory());
             }
         }
     }
