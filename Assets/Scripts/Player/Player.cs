@@ -91,6 +91,8 @@ public class Player : NetworkBehaviour
         {
             canvasEnabled = !canvasEnabled;
             SwitchCanvasEnabled();
+            if(GameObject.Find("InfoBox(Clone)") != null)
+                Destroy(GameObject.Find("InfoBox(Clone)"));
         }
         
         //We left off here. We were going to make it so that you can right-click loot, and it does the above logic to grant the player that item.

@@ -53,6 +53,8 @@ public class NewItem : NetworkBehaviour {
             newPopup.transform.GetChild(3).GetComponent<Text>().text = "Value: " + currentItem.value + " Gold";
             newPopup.transform.GetChild(4).GetComponent<Text>().text = "Rarity: " + currentItem.rarity;
 
+
+            newPopup.transform.localScale = new Vector3(1, 1, 1);
         } 
     }
 

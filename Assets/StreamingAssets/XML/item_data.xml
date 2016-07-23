@@ -61,5 +61,17 @@
       <rarity>Unique</rarity>
       <spritePath>Sprites/Items/mysterious_stone</spritePath>
     </ItemEntry>
+    <ItemEntry>
+      <itemName>Longsword</itemName>
+      <itemID>5</itemID>
+      <damageMin>1</damageMin>
+      <damageMax>8</damageMax>
+      <critModifier>2</critModifier>
+      <armor>0</armor>
+      <type>Weapon</type>
+      <value>25</value>
+      <rarity>Common</rarity>
+      <spritePath>Sprites/Items/sword_placeholder</spritePath>
+    </ItemEntry>
   </Weapons>
 </ItemDatabase>
