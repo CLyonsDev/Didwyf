@@ -73,5 +73,17 @@
       <rarity>Common</rarity>
       <spritePath>Sprites/Items/sword_placeholder</spritePath>
     </ItemEntry>
+    <ItemEntry>
+      <itemName>Short Fat Sword</itemName>
+      <itemID>6</itemID>
+      <damageMin>20</damageMin>
+      <damageMax>30</damageMax>
+      <critModifier>2</critModifier>
+      <armor>0</armor>
+      <type>Weapon</type>
+      <value>50</value>
+      <rarity>Uncommonly Cool</rarity>
+      <spritePath>Sprites/Items/short_fat_sword</spritePath>
+    </ItemEntry>
   </Weapons>
 </ItemDatabase>
