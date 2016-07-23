@@ -15,6 +15,10 @@ public class PlayerNetworkSetup : NetworkBehaviour {
             GetComponent<UIStatManager>().enabled = true;
             transform.tag = "LocalPlayer";
 
-        }          
+        }
+        else
+        {
+            transform.tag = "Player";
+        }  
     }
 }
