@@ -61,7 +61,6 @@ public class EnemyAI : NetworkBehaviour {
 
         if (patrol && !attackingPlayer)
         {
-            Debug.Log("Moving to waypoint");
             MoveTowards(target, range);
         }
 

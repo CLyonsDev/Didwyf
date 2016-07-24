@@ -42,6 +42,7 @@ public class ArrowLogic : NetworkBehaviour {
         Debug.Log("Collided with " + col.transform.name);
         rb.isKinematic = true;
         GetComponent<MeshCollider>().enabled = false;
+        transform.Rotate(new Vector3(Random.Range(-45, 45), Random.Range(-15, 15), Random.Range(-45, 45)));
         if(col.gameObject.layer == LayerMask.NameToLayer("Player"))
         {
             transform.SetParent(target, true);
