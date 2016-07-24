@@ -4,11 +4,12 @@ using System.Collections;
 
 public class ArrowLogic : NetworkBehaviour {
 
+    [HideInInspector] public EnemyBase eb;
+    [HideInInspector] public EnemyAI ai;
+
     public Transform target;
 
     public float speed = 50;
-
-    bool stuck;
 
 	// Use this for initialization
 	void Start () {
@@ -20,21 +21,16 @@ public class ArrowLogic : NetworkBehaviour {
         if (!NetworkServer.active)
             return;
 
-        if(stuck)
-        {
-            transform.SetParent(target, true);
-        }
-
         transform.LookAt(target);
         transform.Rotate(0, 90, 0);
-        
 	}
 
     void OnTriggerEnter(Collider col)
     {
         Debug.Log("Collided with " + col.transform.name);
+        transform.SetParent(target, true);
         GetComponent<Rigidbody>().isKinematic = true;
         GetComponent<MeshCollider>().enabled = false;
-        stuck = true;
+        target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), ai.enemyName);
     }
 }

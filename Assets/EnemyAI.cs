@@ -114,11 +114,13 @@ public class EnemyAI : NetworkBehaviour {
 
     private void RangedAttack()
     {
-        target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), enemyName);
+        //target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), enemyName);
         weapon = transform.GetChild(0);
         GameObject projectileSpawner = weapon.transform.GetChild(0).gameObject;
         GameObject proj = Instantiate(projectile, projectileSpawner.transform.position, projectileSpawner.transform.rotation) as GameObject;
         proj.GetComponent<ArrowLogic>().target = target;
+        proj.GetComponent<ArrowLogic>().eb = GetComponent<EnemyBase>();
+        proj.GetComponent<ArrowLogic>().ai = GetComponent<EnemyAI>();
         NetworkServer.Spawn(proj);
     }
 
