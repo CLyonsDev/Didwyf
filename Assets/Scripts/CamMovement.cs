@@ -32,28 +32,18 @@ public class CamMovement : NetworkBehaviour {
 
         }
 
-        /*if (Input.GetKeyDown(KeyCode.R))
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }*/
-
 
         PlayerPos = player.transform.position;
         pos = transform.position;
 
         if (Input.GetAxis("Mouse ScrollWheel") > 0)
         {
-            //transform.position = Vector3.MoveTowards(pos, PlayerPos, 0.75f);
             transform.position = Vector3.Lerp(pos, PlayerPos, 4.5f * Time.deltaTime);
         }else if(Input.GetAxis("Mouse ScrollWheel") < 0)
         {
             transform.position = Vector3.Lerp(pos, startPos, 8.5f * Time.deltaTime);
         }
 
-        /*if(Input.GetMouseButtonDown(2))
-        {
-            Debug.Log("Pan");
-        }*/
     }
 
     void LateUpdate()
