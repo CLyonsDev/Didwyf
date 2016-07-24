@@ -1,0 +1,5 @@
+TODO:
+- Equipping weapons
+- Weapon ranges
+  - Player attack range
+- Critical hits
