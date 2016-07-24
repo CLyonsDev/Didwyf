@@ -251,6 +251,8 @@ public class CharacterBase : NetworkBehaviour {
             meshRenderer.enabled = true;
         }
 
+        targetPlayer.gameObject.layer = LayerMask.NameToLayer("Player");
+
         if(isLocalPlayer)
         {
             GetComponent<Movement>().enabled = true;
@@ -282,7 +284,9 @@ public class CharacterBase : NetworkBehaviour {
             mr.enabled = false;
         }
 
-        if(isLocalPlayer)
+        targetPlayer.gameObject.layer = LayerMask.NameToLayer("Default");
+
+        if (isLocalPlayer)
         {
             targetPlayer.GetComponent<Movement>().enabled = false;
             targetPlayer.GetComponent<Rotation>().enabled = false;

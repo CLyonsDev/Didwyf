@@ -6,8 +6,9 @@ public class EnemyAI : NetworkBehaviour {
 
     public string enemyName;
 
-    public bool patrol;
+    public bool patrol = true;
     public bool attackingPlayer = false;
+    public bool unitIsRanged = false;
 
     float remainingDistance;
     public float runSpeed;
@@ -16,13 +17,16 @@ public class EnemyAI : NetworkBehaviour {
 
     public float attackRange;
     public float patrolRange;
-    [HideInInspector] public float range;
+    public float range;
 
     public float rateOfAttack = 1;
     public float timer = 0;
 
     public Transform[] waypoints;
-    public Transform target;
+    [SyncVar] public Transform target;
+
+    public GameObject weapon;
+    public GameObject projectile;
 
     NavMeshAgent agent;
 
@@ -30,12 +34,14 @@ public class EnemyAI : NetworkBehaviour {
 
     // Use this for initialization
     void Start () {
+
+        agent = GetComponent<NavMeshAgent>();
+        eb = GetComponent<EnemyBase>();
+
         if (!patrol)
             return;
 
         range = patrolRange;
-        agent = GetComponent<NavMeshAgent>();
-        eb = GetComponent<EnemyBase>();
         target = waypoints[Random.Range(0, waypoints.Length)];
         //agent.updateRotation = false;
 	}
@@ -48,10 +54,16 @@ public class EnemyAI : NetworkBehaviour {
         else if (timer > rateOfAttack)
             timer = rateOfAttack;
 
-        if (!patrol)
+        if (target == null)
             return;
 
-        MoveTowards(target, range);
+        RotateTowards(target);
+
+        if (patrol && !attackingPlayer)
+        {
+            Debug.Log("Moving to waypoint");
+            MoveTowards(target, range);
+        }
 
         if (!attackingPlayer && IsInRange(target, patrolRange))
         {
@@ -62,27 +74,51 @@ public class EnemyAI : NetworkBehaviour {
             }
         }
 
+        if (attackingPlayer)
+        {
+            MoveTowards(target, range);
+        }
+
         if(attackingPlayer && IsInRange(target, attackRange))
         {
             if(target.GetComponent<MeshRenderer>().enabled != true)
             {
-                target = waypoints[Random.Range(0, waypoints.Length)];
                 agent.speed = patrolSpeed;
+                if(waypoints.Length > 0)
+                    target = waypoints[Random.Range(0, waypoints.Length)];
+                attackingPlayer = false;
                 return;
             }
 
             if(timer >= rateOfAttack)
             {
-                Debug.Log("Attacking");
-                target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), enemyName);
+                if(unitIsRanged)
+                {
+                    Debug.Log("Shooting");
+                    RangedAttack();
+                }
+                else
+                {
+                    Debug.Log("Whacking");
+                    MeleeAttack();
+                }
                 timer = 0;
             }
         }
+    }
 
-        
+    private void MeleeAttack()
+    {
+        target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), enemyName); 
+    }
 
-        RotateTowards(target);
-
+    private void RangedAttack()
+    {
+        target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), enemyName);
+        GameObject projectileSpawner = weapon.transform.GetChild(0).gameObject;
+        GameObject proj = Instantiate(projectile, projectileSpawner.transform.position, projectileSpawner.transform.rotation) as GameObject;
+        proj.GetComponent<ArrowLogic>().target = target;
+        NetworkServer.Spawn(proj);
     }
 
     private void MoveTowards(Transform target, float range)

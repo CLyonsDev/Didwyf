@@ -11,7 +11,7 @@ public class FieldOfView : MonoBehaviour
 
     public float alertRadius;
 
-    public float patrolRadius;
+    public float autoDetectRadius;
 
     public LayerMask targetMask;
     public LayerMask obstacleMask;

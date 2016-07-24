@@ -24,7 +24,7 @@ public class Player : NetworkBehaviour
             return;
         }
 
-        inventoryUIGO = GameObject.Find("InventoryScreen");
+        inventoryUIGO = GameObject.Find("Canvas").transform.GetChild(3).gameObject;
 
         //StartCoroutine(DisableinventoryUIGOAfterADelay());
         //Debug.Log("RpcCalcStats");
@@ -95,7 +95,15 @@ public class Player : NetworkBehaviour
                 Destroy(GameObject.Find("InfoBox(Clone)"));
         }
         
-        //We left off here. We were going to make it so that you can right-click loot, and it does the above logic to grant the player that item.
+        if(Input.GetMouseButtonDown(0))
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity) && hit.transform.tag == "Enemy")
+            {
+                SendAttack(hit.transform.gameObject.GetComponent<NetworkIdentity>().netId);
+            }
+        }
+
         if(Input.GetMouseButtonDown(1))
         {
             Debug.Log("Looking for loot");
@@ -106,6 +114,17 @@ public class Player : NetworkBehaviour
                 RequestItem(GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, hit.transform.gameObject.GetComponent<NetworkIdentity>().netId,index);
                 StartCoroutine(RefreshInventory());
             }
+        }
+    }
+
+    void SendAttack(NetworkInstanceId targetID)
+    {
+        if (!isLocalPlayer)
+            return;
+
+        if(!Network.isServer)
+        {
+            CmdSendAttack(targetID);
         }
     }
 
@@ -139,6 +158,13 @@ public class Player : NetworkBehaviour
         Debug.Log("Requesting to remove the item " + itemToRemove.itemName + ".");
         int index = inventory.IndexOf(itemToRemove);
         CmdRemoveItem(playerID, gamemanagerID, index);
+    }
+
+    [Command]
+    void CmdSendAttack(NetworkInstanceId targetID)
+    {
+        GameObject target = NetworkServer.FindLocalObject(targetID);
+        target.GetComponent<EnemyBase>().TakeDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(GetComponent<CharacterBase>().totalDamageMin, GetComponent<CharacterBase>().totalDamageMax)), transform.name);
     }
 
     [Command]

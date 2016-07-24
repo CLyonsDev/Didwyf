@@ -113,13 +113,6 @@ public class EnemyBase : NetworkBehaviour
 
     public void RandomizeStats()
     {
-        if (!isLocalPlayer)
-        {
-            Debug.Log("!islocalplayer");
-            return;
-        }
-
-
         strength = Random.Range(statMin, statMax);
         dexterity = Random.Range(statMin, statMax);
         intelligence = Random.Range(statMin, statMax);
@@ -292,17 +285,20 @@ public class EnemyBase : NetworkBehaviour
             mr.enabled = false;
         }
 
-        if (isLocalPlayer)
+        if (NetworkServer.active)
         {
-            targetPlayer.GetComponent<Movement>().enabled = false;
-            targetPlayer.GetComponent<Rotation>().enabled = false;
+            targetPlayer.GetComponent<EnemyAI>().enabled = false;
+            //targetPlayer.GetComponent<NavMeshAgent>().enabled = false;
+            targetPlayer.GetComponent<FieldOfView>().enabled = false;
+            targetPlayer.GetComponent<NavMeshAgent>().ResetPath();
+            NetworkServer.Destroy(targetPlayer);
         }
     }
 
     [ClientRpc]
     public void RpcRespawn(NetworkInstanceId playerID)
     {
-        GameObject player = ClientScene.FindLocalObject(playerID);
+        GameObject target = ClientScene.FindLocalObject(playerID);
 
         if (!isDead)
         {
@@ -318,33 +314,9 @@ public class EnemyBase : NetworkBehaviour
             mr.enabled = true;
         }
 
-        player.GetComponent<Movement>().enabled = true;
-        player.GetComponent<Rotation>().enabled = true;
-
-        currentHealth = maxHealth;
-    }
-
-    [Command]
-    public void CmdRespawn()
-    {
-        if (!isDead)
-        {
-            Debug.LogError("Character " + gameObject.transform.name + " is trying to respawn but isn't dead!");
-            return;
-        }
-
-        Debug.Log("Respawned!");
-        isDead = false;
-        MeshRenderer[] mr = GetComponentsInChildren<MeshRenderer>();
-        {
-            foreach (MeshRenderer m in mr)
-            {
-                m.enabled = true;
-            }
-        }
-
-        GetComponent<Movement>().enabled = true;
-        GetComponent<Rotation>().enabled = true;
+        target.GetComponent<EnemyAI>().enabled = true;
+        target.GetComponent<NavMeshAgent>().enabled = true;
+        target.GetComponent<FieldOfView>().enabled = true;
 
         currentHealth = maxHealth;
     }

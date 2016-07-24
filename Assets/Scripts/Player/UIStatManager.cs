@@ -32,10 +32,13 @@ public class UIStatManager : MonoBehaviour {
     // This is really sloppy, we can clean it up later
     void Update() {
 
-        if (playerScript == null || healthImage == null || ArmorClassText == null || characterName == null)
+        if (playerScript == null || healthImage == null || ArmorClassText == null || characterName == null || attributeContainer == null)
         {
             GrabReferences();
         }
+
+        if (attributeContainer == null)
+            return;
 
         if ((healthImage.fillAmount != (playerScript.currentHealth / playerScript.maxHealth)))
         {
@@ -80,6 +83,9 @@ public class UIStatManager : MonoBehaviour {
         {
             attributeContainer = GameObject.Find("AttributesPanel");
         }
+
+        if (attributeContainer == null)
+            return;
 
         if (healthImage == null)
         {

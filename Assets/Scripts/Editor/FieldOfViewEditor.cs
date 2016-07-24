@@ -20,7 +20,7 @@ public class FieldOfViewEditor : Editor {
         Handles.DrawWireArc(fow.transform.position, Vector3.up, Vector3.forward, 360, fow.alertRadius);
 
         Handles.color = Color.yellow;
-        Handles.DrawWireArc(fow.transform.position, Vector3.up, Vector3.forward, 360, fow.patrolRadius);
+        Handles.DrawWireArc(fow.transform.position, Vector3.up, Vector3.forward, 360, fow.autoDetectRadius);
 
         Handles.color = Color.red;
 
@@ -28,5 +28,17 @@ public class FieldOfViewEditor : Editor {
         {
             Handles.DrawLine(fow.transform.position, visibleTarget.transform.position);
         }
+    }
+}
+
+[CustomEditor (typeof(EnemyAI))]
+public class RangeDisplayers : Editor
+{
+    void OnSceneGUI()
+    {
+        EnemyAI ai = (EnemyAI)target;
+
+        Handles.color = Color.blue;
+        Handles.DrawWireArc(ai.transform.position, Vector3.up, Vector3.forward, 360, ai.attackRange);
     }
 }
