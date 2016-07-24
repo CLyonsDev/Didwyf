@@ -6,24 +6,35 @@ public class ArrowLogic : NetworkBehaviour {
 
     public Transform target;
 
-    public float speed = 10f;
+    public float speed = 50;
+
+    bool stuck;
 
 	// Use this for initialization
 	void Start () {
-	
-	}
+        GetComponent<Rigidbody>().AddForce(-transform.right * speed, ForceMode.Impulse);
+    }
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
         if (!NetworkServer.active)
             return;
 
+        if(stuck)
+        {
+            transform.SetParent(target, true);
+        }
+
         transform.LookAt(target);
-        //GetComponent<Rigidbody>().AddForce(-transform.forward * speed, ForceMode.VelocityChange);
+        transform.Rotate(0, 90, 0);
+        
 	}
 
     void OnTriggerEnter(Collider col)
     {
+        Debug.Log("Collided with " + col.transform.name);
         GetComponent<Rigidbody>().isKinematic = true;
+        GetComponent<MeshCollider>().enabled = false;
+        stuck = true;
     }
 }

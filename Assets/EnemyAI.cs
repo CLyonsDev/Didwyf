@@ -25,7 +25,7 @@ public class EnemyAI : NetworkBehaviour {
     public Transform[] waypoints;
     [SyncVar] public Transform target;
 
-    public GameObject weapon;
+    public Transform weapon;
     public GameObject projectile;
 
     NavMeshAgent agent;
@@ -115,6 +115,7 @@ public class EnemyAI : NetworkBehaviour {
     private void RangedAttack()
     {
         target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), enemyName);
+        weapon = transform.GetChild(0);
         GameObject projectileSpawner = weapon.transform.GetChild(0).gameObject;
         GameObject proj = Instantiate(projectile, projectileSpawner.transform.position, projectileSpawner.transform.rotation) as GameObject;
         proj.GetComponent<ArrowLogic>().target = target;
