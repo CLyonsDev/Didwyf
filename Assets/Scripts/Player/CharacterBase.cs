@@ -284,6 +284,7 @@ public class CharacterBase : NetworkBehaviour {
             mr.enabled = false;
         }
 
+        //targetPlayer.GetComponent<CapsuleCollider>().enabled = false;
         targetPlayer.gameObject.layer = LayerMask.NameToLayer("Default");
 
         if (isLocalPlayer)
@@ -311,6 +312,8 @@ public class CharacterBase : NetworkBehaviour {
         {
             mr.enabled = true;
         }
+
+        player.GetComponent<CapsuleCollider>().enabled = false;
 
         player.GetComponent<Movement>().enabled = true;
         player.GetComponent<Rotation>().enabled = true;
