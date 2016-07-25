@@ -91,36 +91,58 @@ public class EnemyAI : NetworkBehaviour {
 
             if(timer >= rateOfAttack)
             {
-                if(unitIsRanged)
-                {
-                    Debug.Log("Shooting");
-                    RangedAttack();
-                }
-                else
-                {
-                    Debug.Log("Whacking");
-                    MeleeAttack();
-                }
+                Attack();
                 timer = 0;
             }
         }
     }
 
-    private void MeleeAttack()
+    private void Attack()
+    {
+        int ac = target.GetComponent<CharacterBase>().armorRating;
+
+        int roll;
+
+        if (!unitIsRanged)
+            roll = (Random.Range(1, 20) + GetComponent<EnemyBase>().strength);
+        else
+        {
+            roll = (Random.Range(1, 20) + GetComponent<EnemyBase>().dexterity);
+        }  
+
+        Debug.Log("Rolled a " + roll + " against an AC of " + ac + ".");
+
+        Debug.Log("The attack hits!");
+
+        if (unitIsRanged)
+        {
+            RangedHit(roll < ac);
+        }
+        else
+        {
+            if (roll < ac)
+                return;
+            MeleeHit();
+        }
+    }
+
+    private void MeleeHit()
     {
         target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), enemyName); 
     }
 
-    private void RangedAttack()
+    private void RangedHit(bool hits)
     {
         //target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), enemyName);
         weapon = transform.GetChild(0);
         GameObject projectileSpawner = weapon.transform.GetChild(0).gameObject;
-        GameObject proj = Instantiate(projectile, projectileSpawner.transform.position, projectileSpawner.transform.rotation) as GameObject;
+        GameObject proj = Instantiate(projectile, projectileSpawner.transform.position, transform.rotation) as GameObject;
         proj.GetComponent<ArrowLogic>().target = target;
         proj.GetComponent<ArrowLogic>().eb = GetComponent<EnemyBase>();
         proj.GetComponent<ArrowLogic>().ai = GetComponent<EnemyAI>();
         NetworkServer.Spawn(proj);
+
+        proj.GetComponent<ArrowLogic>().shouldHit = hits;
     }
 
     private void MoveTowards(Transform target, float range)

@@ -3,3 +3,4 @@ TODO:
 - Weapon ranges
   - Player attack range
 - Critical hits
+- Attacking VS armor class
