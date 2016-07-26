@@ -1,0 +1,2 @@
+External programs for item creation.
+Player 'item pick-up' range
