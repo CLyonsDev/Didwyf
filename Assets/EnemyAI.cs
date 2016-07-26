@@ -64,7 +64,7 @@ public class EnemyAI : NetworkBehaviour {
             MoveTowards(target, range);
         }
 
-        if (!attackingPlayer && IsInRange(target, patrolRange))
+        if (!attackingPlayer && IsInRange(target, patrolRange) && waypoints.Length > 0 && waypoints[0] != null)
         {
             Transform tempTarg = target;
             while(target == tempTarg)
@@ -78,12 +78,12 @@ public class EnemyAI : NetworkBehaviour {
             MoveTowards(target, range);
         }
 
-        if(attackingPlayer && IsInRange(target, attackRange))
+        if(attackingPlayer && IsInRange(target, attackRange) && !GetComponent<EnemyBase>().isDead)
         {
             if(target.GetComponent<MeshRenderer>().enabled != true)
             {
                 agent.speed = patrolSpeed;
-                if(waypoints.Length > 0)
+                if(waypoints.Length > 0 && waypoints[0] != null)
                     target = waypoints[Random.Range(0, waypoints.Length)];
                 attackingPlayer = false;
                 return;
@@ -104,23 +104,23 @@ public class EnemyAI : NetworkBehaviour {
         int roll;
 
         if (!unitIsRanged)
-            roll = (Random.Range(1, 20) + GetComponent<EnemyBase>().strength);
+            roll = (Random.Range(1, 20) + (GetComponent<EnemyBase>().strength / 2));
         else
         {
-            roll = (Random.Range(1, 20) + GetComponent<EnemyBase>().dexterity);
+            roll = (Random.Range(1, 20) + (GetComponent<EnemyBase>().dexterity / 2));
         }  
 
-        Debug.Log("Rolled a " + roll + " against an AC of " + ac + ".");
+        //Debug.Log("Rolled a " + roll + " against an AC of " + ac + ".");
 
-        Debug.Log("The attack hits!");
+        //Debug.Log("The attack hits!");
 
         if (unitIsRanged)
         {
-            RangedHit(roll < ac);
+            RangedHit(roll < ac || !(roll == 20));
         }
         else
         {
-            if (roll < ac)
+            if (roll < ac || !(roll == 20))
                 return;
             MeleeHit();
         }

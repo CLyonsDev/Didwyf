@@ -15,6 +15,8 @@ public class Player : NetworkBehaviour
 
     public List<ItemEntry> inventory = new List<ItemEntry>();
 
+    NetworkInstanceId playerNetID;
+
     // Use this for initialization
     void Start()
     {
@@ -25,6 +27,8 @@ public class Player : NetworkBehaviour
         }
 
         inventoryUIGO = GameObject.Find("Canvas").transform.GetChild(3).gameObject;
+
+        playerNetID = GetComponent<NetworkIdentity>().netId;
 
         //StartCoroutine(DisableinventoryUIGOAfterADelay());
         //Debug.Log("RpcCalcStats");
@@ -49,8 +53,8 @@ public class Player : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.B))
         {
             //CmdTakeDamage(5, "Environment");
-            Debug.Log("Dealing 5 damage to NetID " + GetComponent<NetworkIdentity>().netId);
-            GetComponent<CharacterBase>().CmdReportDamage(GetComponent<NetworkIdentity>().netId, 5, "Environment");
+            Debug.Log("Dealing 5 damage to NetID " + playerNetID);
+            GetComponent<CharacterBase>().CmdReportDamage(playerNetID, 5, "Environment");
         }
 
         if(Input.GetKeyDown(KeyCode.V))
@@ -60,7 +64,7 @@ public class Player : NetworkBehaviour
 
         if (Input.GetKeyDown(KeyCode.N))
         {
-            GetComponent<CharacterBase>().CmdRequestRespawn(GetComponent<NetworkIdentity>().netId);
+            GetComponent<CharacterBase>().CmdRequestRespawn(playerNetID);
         }
 
         if(Input.GetKeyDown(KeyCode.C))
@@ -77,14 +81,14 @@ public class Player : NetworkBehaviour
                 Debug.Log("You are the player.");
 
                 GameObject dummy = Instantiate(dummyGO, Vector3.zero, Quaternion.identity) as GameObject;
-                RequestItem(GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, dummy.GetComponent<NetworkIdentity>().netId, Random.Range(0, XMLManager.ins.itemDB.list.Count ));
+                RequestItem(playerNetID, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, dummy.GetComponent<NetworkIdentity>().netId, Random.Range(0, XMLManager.ins.itemDB.list.Count ));
                 StartCoroutine(RefreshInventory());
             }
         }
 
         if(Input.GetKeyDown(KeyCode.L))
         {
-            GetComponent<CharacterBase>().CmdAddStats(GetComponent<NetworkIdentity>().netId, 100, 0, 0, 0);
+            GetComponent<CharacterBase>().CmdAddStats(playerNetID, 100, 0, 0, 0);
         }
 
         if(Input.GetKeyDown(KeyCode.I))
@@ -100,7 +104,10 @@ public class Player : NetworkBehaviour
             RaycastHit hit;
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity) && hit.transform.tag == "Enemy")
             {
-                SendAttack(hit.transform.gameObject.GetComponent<NetworkIdentity>().netId);
+                if (Vector3.Distance(transform.position, hit.transform.position) < GetComponent<CharacterBase>().weaponRange)
+                    CmdAttack(hit.transform.gameObject.GetComponent<NetworkIdentity>().netId, playerNetID);
+                else
+                    Debug.Log("Not in range!");
             }
         }
 
@@ -111,20 +118,41 @@ public class Player : NetworkBehaviour
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity) && hit.transform.tag == "Loot")
             {
                 int index = hit.transform.gameObject.GetComponent<CollectableItem>().itemIndex;
-                RequestItem(GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, hit.transform.gameObject.GetComponent<NetworkIdentity>().netId,index);
+                RequestItem(playerNetID, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, hit.transform.gameObject.GetComponent<NetworkIdentity>().netId,index);
                 StartCoroutine(RefreshInventory());
             }
         }
     }
 
-    void SendAttack(NetworkInstanceId targetID)
+    [Command]
+    private void CmdAttack(NetworkInstanceId targetID, NetworkInstanceId playerID)
     {
         if (!isLocalPlayer)
             return;
 
-        if(!Network.isServer)
+        GameObject enemy = NetworkServer.FindLocalObject(targetID);
+        CharacterBase player = NetworkServer.FindLocalObject(playerID).GetComponent<CharacterBase>();
+
+        EnemyBase eb = enemy.GetComponent<EnemyBase>();
+
+        int roll = (Random.Range(0, 20));
+        int modRoll = (roll + player.strength / 2);
+
+        Debug.LogError(modRoll + " (" + roll + " + " + (player.strength / 2) + ")");
+        if (modRoll >= eb.armorRating)
         {
-            CmdSendAttack(targetID);
+            SendAttack(enemy.GetComponent<NetworkIdentity>().netId, roll == 20, GetComponent<CharacterBase>().weaponCritModifier);
+        }
+    }
+
+    void SendAttack(NetworkInstanceId targetID, bool isCrit, float critMult)
+    {
+        if (!isLocalPlayer)
+            return;
+
+        if (!Network.isServer)
+        {
+            CmdSendAttack(targetID, isCrit, critMult);
         }
     }
 
@@ -161,10 +189,13 @@ public class Player : NetworkBehaviour
     }
 
     [Command]
-    void CmdSendAttack(NetworkInstanceId targetID)
+    void CmdSendAttack(NetworkInstanceId targetID, bool isCrit, float critMult)
     {
         GameObject target = NetworkServer.FindLocalObject(targetID);
-        target.GetComponent<EnemyBase>().TakeDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(GetComponent<CharacterBase>().totalDamageMin, GetComponent<CharacterBase>().totalDamageMax)), transform.name);
+        if (isCrit)
+            target.GetComponent<EnemyBase>().TakeDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(GetComponent<CharacterBase>().totalDamageMin, GetComponent<CharacterBase>().totalDamageMax)) * critMult, transform.name);
+        else
+            target.GetComponent<EnemyBase>().TakeDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(GetComponent<CharacterBase>().totalDamageMin, GetComponent<CharacterBase>().totalDamageMax)), transform.name);
     }
 
     [Command]
@@ -176,7 +207,7 @@ public class Player : NetworkBehaviour
         if(im != null)
         {
             Debug.Log("Server has been asked to remove the item.");
-            im.RemoveItem(GetComponent<NetworkIdentity>().netId, index);
+            im.RemoveItem(playerNetID, index);
         }
     }
 
@@ -196,7 +227,7 @@ public class Player : NetworkBehaviour
         if (im != null)
         {
             Debug.Log("Server has been asked for the item.");
-            im.RequestItem(GetComponent<NetworkIdentity>().netId, itemGOID, itemIndex);
+            im.RequestItem(playerNetID, itemGOID, itemIndex);
             //uim.RefreshInventory();
             //player.GetComponent<Player>().StartCoroutine(RefreshInventory(objectID));
             //player.GetComponent<Player>().StartCoroutine(RefreshInventory());
@@ -218,7 +249,7 @@ public class Player : NetworkBehaviour
         if (im != null)
         {
             Debug.Log("Server has been asked for the item.");
-            im.RequestItem(GetComponent<NetworkIdentity>().netId, itemGOID, itemIndex);
+            im.RequestItem(playerNetID, itemGOID, itemIndex);
             StartCoroutine(RefreshInventory());
             //gm.GetComponent<InventoryUIManager>().CmdRefreshInventory();
         }

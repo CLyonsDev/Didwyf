@@ -69,7 +69,7 @@ public class ArrowLogic : NetworkBehaviour {
     {
         moving = false;
 
-        Debug.Log("Hit, ShouldHit = " + shouldHit);
+        //Debug.Log("Hit, ShouldHit = " + shouldHit);
 
         if (shouldHit)
         {
@@ -88,7 +88,7 @@ public class ArrowLogic : NetworkBehaviour {
 
     void OnCollisionEnter(Collision col)
     {
-        Debug.Log("Missed and collided with " + col.transform.name);
+        //Debug.Log("Missed and collided with " + col.transform.name);
 
         moving = false;
         rb.useGravity = true;

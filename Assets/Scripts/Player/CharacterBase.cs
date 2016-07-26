@@ -25,6 +25,7 @@ public class CharacterBase : NetworkBehaviour {
     [SyncVar] public float weaponDamageMin;
     [SyncVar] public float weaponDamageMax;
     [SyncVar] public float weaponCritModifier;
+    [SyncVar] public float weaponRange;
 
 
     [SyncVar] public float totalDamageMin;
@@ -45,8 +46,10 @@ public class CharacterBase : NetworkBehaviour {
 
         //Debug.LogWarning("Trying to randomize our stats. Our player's NetworkID is " + GetComponent<NetworkIdentity>().netId);
 
-        if(strength == 0)
+        if (strength == 0)
             CmdRandomizeStats(GetComponent<NetworkIdentity>().netId);
+        else
+            GenerateStats();
 
         //RandomizeStats();
         //GenerateStats();
@@ -212,7 +215,7 @@ public class CharacterBase : NetworkBehaviour {
 
         GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
 
-        Debug.Log("Took " + damage + " damage from \"" + source + "\"!");
+        Debug.Log(transform.name + " took " + damage + " damage from \"" + source + "\"!");
         currentHealth -= damage;
         Debug.Log(currentHealth + " / " + maxHealth);
         if(currentHealth <= 0)

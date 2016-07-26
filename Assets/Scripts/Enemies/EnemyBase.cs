@@ -66,6 +66,9 @@ public class EnemyBase : NetworkBehaviour
 
         //Debug.LogWarning("Trying to randomize our stats. Our player's NetworkID is " + GetComponent<NetworkIdentity>().netId);
 
+        if (!NetworkServer.active)
+            return;
+
         if (useStatSheet && (statSheetName != null && statSheetName != ""))
             CmdGenerateStatsFromSheet(GetComponent<NetworkIdentity>().netId);
         else
@@ -113,7 +116,12 @@ public class EnemyBase : NetworkBehaviour
     [ClientRpc]
     public void RpcGenerateStatsFromSheet(NetworkInstanceId thisID)
     {
-        //Debug.LogWarning("RpcGenerateStatsFromSheet");
+        /*
+
+        We should really put this code on the GameManager.
+
+        */
+
         EnemyBase thisCreature = ClientScene.FindLocalObject(thisID).GetComponent<EnemyBase>();
 
         XmlDocument creatureDoc = new XmlDocument();
@@ -303,7 +311,7 @@ public class EnemyBase : NetworkBehaviour
 
         GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
 
-        Debug.Log("Took " + damage + " damage from \"" + source + "\"!");
+        Debug.Log(transform.name + " took " + damage + " damage from \"" + source + "\"!");
         currentHealth -= damage;
         Debug.Log(currentHealth + " / " + maxHealth);
         if (currentHealth <= 0)
@@ -360,7 +368,7 @@ public class EnemyBase : NetworkBehaviour
         GameObject targetPlayer = ClientScene.FindLocalObject(playerID);
 
         currentHealth = 0;
-        Debug.Log("DEAD");
+        //Debug.Log("DEAD");
         isDead = true;
 
         /*foreach (MeshRenderer m in meshRenderers)
