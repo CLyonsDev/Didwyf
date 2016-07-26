@@ -28,6 +28,9 @@ public class CharacterBase : NetworkBehaviour {
     [SyncVar] public float weaponDamageMax;
     [SyncVar] public float weaponCritModifier;
     [SyncVar] public float weaponRange;
+    [SyncVar] public float weaponAttackDelay;
+
+    [HideInInspector] public float attackTimer = 0;
 
 
     [SyncVar] public float totalDamageMin;
@@ -53,9 +56,19 @@ public class CharacterBase : NetworkBehaviour {
         else
             GenerateStats();
 
+        RecalculateDamage();
+
         //RandomizeStats();
         //GenerateStats();
         //CmdCalcStats(GetComponent<NetworkIdentity>().netId);
+    }
+
+    void Update()
+    {
+        if(attackTimer < weaponAttackDelay)
+            attackTimer += Time.deltaTime;
+        if (attackTimer > weaponAttackDelay)
+            attackTimer = weaponAttackDelay;
     }
 
     void UpdateStr(int str)
@@ -89,7 +102,7 @@ public class CharacterBase : NetworkBehaviour {
     void UpdateDamage(ItemEntry newItem)
     {
         equipedItem = newItem;
-        GenerateStats();
+        RecalculateDamage();
     }
 
     public void EquipItem(ItemEntry itemToEquip)
@@ -167,10 +180,27 @@ public class CharacterBase : NetworkBehaviour {
 
         cb.totalDamageMin = cb.weaponDamageMin + cb.strength;
         cb.totalDamageMax = cb.weaponDamageMax + cb.strength;
+    }
 
-        //Debug.Log(cb.currentHealth + " / " + cb.maxHealth);
-        //Debug.Log(cb.evadeChance);
-        //Debug.Log(cb.armorRating);
+    private void RecalculateDamage()
+    {
+        if (equipedItem.damageMin != 0 && equipedItem.damageMax != 0)
+        {
+            weaponRange = equipedItem.weaponRange;
+            weaponDamageMin = equipedItem.damageMin;
+            weaponDamageMax = equipedItem.damageMax;
+            weaponAttackDelay = equipedItem.attackDelay;
+        }
+        else
+        {
+            weaponRange = 1f;
+            weaponDamageMin = 1;
+            weaponDamageMax = 4;
+            weaponAttackDelay = 0.75f;
+        }
+
+        totalDamageMin = weaponDamageMin + (strength / 2);
+        totalDamageMax = weaponDamageMax + (strength / 2);
     }
 
     private void GenerateStatsNoNetworking()
@@ -180,28 +210,10 @@ public class CharacterBase : NetworkBehaviour {
         armorRating = evadeChance;
 
         currentHealth = maxHealth;
-
-        if (equipedItem.damageMin != 0 && equipedItem.damageMax != 0)
-        {
-            weaponRange = equipedItem.weaponRange;
-            weaponDamageMin = equipedItem.damageMin;
-            weaponDamageMax = equipedItem.damageMax;
-        }
-        else
-        {
-            weaponRange = 1f;
-            weaponDamageMin = 1;
-            weaponDamageMax = 4;
-        }
-
-        totalDamageMin = weaponDamageMin + (strength / 2);
-        totalDamageMax = weaponDamageMax + (strength / 2);
     }
 
     public void GenerateStats()
     {
-        //Debug.Log("GenerateStats()");
-        //CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
         GenerateStatsNoNetworking();
     }
 

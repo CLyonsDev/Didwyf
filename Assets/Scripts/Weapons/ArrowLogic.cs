@@ -15,6 +15,8 @@ public class ArrowLogic : NetworkBehaviour {
 
     [SyncVar] public bool shouldHit;
 
+    [SyncVar] public bool isCrit = false;
+
     [SyncVar] bool moving = true;
 
 	// Use this for initialization
@@ -81,7 +83,12 @@ public class ArrowLogic : NetworkBehaviour {
                 transform.SetParent(target, true);
 
                 if (NetworkServer.active == true)
-                    target.gameObject.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), ai.enemyName);
+                {
+                    if (isCrit)
+                        target.gameObject.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)) * GetComponent<EnemyBase>().weaponCritModifier, ai.enemyName);
+                    else
+                        target.gameObject.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), ai.enemyName);
+                }
             }
         }
     }

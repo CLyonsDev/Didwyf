@@ -1,7 +1,9 @@
 TODO:
-- Equipping weapons
-- Weapon ranges
+- Equipping weapons [X]
+- Weapon ranges [X]
   - Player attack range [X]
+- Weapon attack speed [X]
+  - Player attack speed [X]
 - Critical hits [X]
 - Attacking VS armor class [X]
 

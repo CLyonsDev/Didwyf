@@ -102,13 +102,19 @@ public class EnemyAI : NetworkBehaviour {
         int ac = target.GetComponent<CharacterBase>().armorRating;
 
         int roll;
+        int modRoll;
+
+        roll = (Random.Range(1, 20));
 
         if (!unitIsRanged)
-            roll = (Random.Range(1, 20) + (GetComponent<EnemyBase>().strength / 2));
+            modRoll = roll + (GetComponent<EnemyBase>().strength / 2);
         else
         {
-            roll = (Random.Range(1, 20) + (GetComponent<EnemyBase>().dexterity / 2));
-        }  
+            modRoll = roll + (GetComponent<EnemyBase>().dexterity / 2);
+        }
+
+        Debug.Log(transform.name + " is attacking " + target.transform.name + " (" + roll + " (" + modRoll + "))!");
+
 
         //Debug.Log("Rolled a " + roll + " against an AC of " + ac + ".");
 
@@ -116,24 +122,27 @@ public class EnemyAI : NetworkBehaviour {
 
         if (unitIsRanged)
         {
-            RangedHit(roll < ac || !(roll == 20));
+            RangedHit(modRoll >= ac || roll == 20, roll == 20);
         }
         else
         {
-            if (roll < ac || !(roll == 20))
-                return;
-            MeleeHit();
+            MeleeHit(modRoll >= ac || roll == 20, roll == 20);
         }
     }
 
-    private void MeleeHit()
+    private void MeleeHit(bool hits, bool isCrit)
     {
-        target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), enemyName); 
+        if(hits)
+        {
+            if (isCrit)
+                target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)) * GetComponent<EnemyBase>().weaponCritModifier, enemyName);
+            else
+                target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), enemyName);
+        }
     }
 
-    private void RangedHit(bool hits)
+    private void RangedHit(bool hits, bool isCrit)
     {
-        //target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), enemyName);
         weapon = transform.GetChild(0);
         GameObject projectileSpawner = weapon.transform.GetChild(0).gameObject;
         GameObject proj = Instantiate(projectile, projectileSpawner.transform.position, transform.rotation) as GameObject;

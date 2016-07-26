@@ -26,15 +26,6 @@ public class Player : NetworkBehaviour
         }
 
         inventoryUIGO = GameObject.Find("Canvas").transform.GetChild(3).gameObject;
-
-        //StartCoroutine(DisableinventoryUIGOAfterADelay());
-        //Debug.Log("RpcCalcStats");
-
-        /*For some reason it can't find the netID of the player fml*/
-        //GetComponent<CharacterBase>().CmdRandomizeStats(GetComponent<NetworkIdentity>().netId);
-        //GetComponent<CharacterBase>().CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
-
-        //StartCoroutine(DisableinventoryUIGOAfterADelay());
     }
 
     void Update()
@@ -49,7 +40,6 @@ public class Player : NetworkBehaviour
 
         if (Input.GetKeyDown(KeyCode.B))
         {
-            //CmdTakeDamage(5, "Environment");
             Debug.Log("Dealing 5 damage to NetID " + GetComponent<NetworkIdentity>().netId);
             GetComponent<CharacterBase>().CmdReportDamage(GetComponent<NetworkIdentity>().netId, 5, "Environment");
         }
@@ -96,16 +86,23 @@ public class Player : NetworkBehaviour
                 Destroy(GameObject.Find("InfoBox(Clone)"));
         }
         
-        if(Input.GetMouseButtonDown(0))
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity) && hit.transform.tag == "Enemy")
+        if(Input.GetMouseButtonDown(0) && GameObject.Find("InventoryScreen") == null)
+        { 
+            CharacterBase cb = GetComponent<CharacterBase>();
+
+            if(cb.attackTimer >= cb.weaponAttackDelay)
             {
-                if (Vector3.Distance(transform.position, hit.transform.position) < GetComponent<CharacterBase>().weaponRange)
-                    CmdAttack(hit.transform.gameObject.GetComponent<NetworkIdentity>().netId, GetComponent<NetworkIdentity>().netId);
-                else
-                    Debug.Log("Not in range!");
-            }
+                Debug.LogError("Attacking");
+                RaycastHit hit;
+                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity) && hit.transform.tag == "Enemy")
+                {
+                    if (Vector3.Distance(transform.position, hit.transform.position) < GetComponent<CharacterBase>().weaponRange)
+                        CmdAttack(hit.transform.gameObject.GetComponent<NetworkIdentity>().netId, GetComponent<NetworkIdentity>().netId);
+                    else
+                        Debug.Log("Not in range!");
+                }
+                cb.attackTimer = 0;
+            }  
         }
 
         if(Input.GetMouseButtonDown(1))
