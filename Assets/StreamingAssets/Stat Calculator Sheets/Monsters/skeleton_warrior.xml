@@ -4,7 +4,7 @@
   <charName>Skeleton Warrior</charName>
   <critMult>2</critMult>
   <weaponDamageMin>1</weaponDamageMin>
-  <weaponDamageMax>4</weaponDamageMax>
+  <weaponDamageMax>3</weaponDamageMax>
   <str>3</str>
   <dex>1</dex>
   <ints>2</ints>

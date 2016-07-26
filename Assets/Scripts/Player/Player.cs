@@ -85,6 +85,11 @@ public class Player : NetworkBehaviour
             if(GameObject.Find("InfoBox(Clone)") != null)
                 Destroy(GameObject.Find("InfoBox(Clone)"));
         }
+
+        if(Input.GetKeyDown(KeyCode.Keypad5))
+        {
+            CmdReloadLevel();
+        }
         
         if(Input.GetMouseButtonDown(0) && GameObject.Find("InventoryScreen") == null)
         { 
@@ -116,6 +121,18 @@ public class Player : NetworkBehaviour
                 StartCoroutine(RefreshInventory());
             }
         }
+    }
+
+    [Command]
+    void CmdReloadLevel()
+    {
+        NetworkManager.singleton.ServerChangeScene(NetworkManager.networkSceneName);
+    }
+
+    [ClientRpc]
+    void RpcReloadLevel()
+    {
+       
     }
 
     [Command]

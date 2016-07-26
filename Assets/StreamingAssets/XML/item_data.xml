@@ -4,8 +4,8 @@
     <ItemEntry>
       <itemName>Steel Sword</itemName>
       <itemID>0</itemID>
-      <damageMin>10</damageMin>
-      <damageMax>20</damageMax>
+      <damageMin>1</damageMin>
+      <damageMax>6</damageMax>
       <critModifier>5</critModifier>
       <weaponRange>3</weaponRange>
       <attackDelay>0.5</attackDelay>
@@ -92,7 +92,7 @@
       <damageMax>30</damageMax>
       <critModifier>2</critModifier>
       <weaponRange>3</weaponRange>
-      <attackDelay>1.5</attackDelay>
+      <attackDelay>2</attackDelay>
       <armor>0</armor>
       <type>Weapon</type>
       <value>50</value>
