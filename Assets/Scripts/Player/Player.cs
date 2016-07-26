@@ -18,6 +18,7 @@ public class Player : NetworkBehaviour
     // Use this for initialization
     void Start()
     {
+
         if (!isLocalPlayer)
         {
             Debug.LogWarning("Not Local Player");
@@ -25,15 +26,6 @@ public class Player : NetworkBehaviour
         }
 
         inventoryUIGO = GameObject.Find("Canvas").transform.GetChild(3).gameObject;
-
-        //StartCoroutine(DisableinventoryUIGOAfterADelay());
-        //Debug.Log("RpcCalcStats");
-
-        /*For some reason it can't find the netID of the player fml*/
-        //GetComponent<CharacterBase>().CmdRandomizeStats(GetComponent<NetworkIdentity>().netId);
-        //GetComponent<CharacterBase>().CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
-
-        //StartCoroutine(DisableinventoryUIGOAfterADelay());
     }
 
     void Update()
@@ -48,7 +40,6 @@ public class Player : NetworkBehaviour
 
         if (Input.GetKeyDown(KeyCode.B))
         {
-            //CmdTakeDamage(5, "Environment");
             Debug.Log("Dealing 5 damage to NetID " + GetComponent<NetworkIdentity>().netId);
             GetComponent<CharacterBase>().CmdReportDamage(GetComponent<NetworkIdentity>().netId, 5, "Environment");
         }
@@ -94,14 +85,29 @@ public class Player : NetworkBehaviour
             if(GameObject.Find("InfoBox(Clone)") != null)
                 Destroy(GameObject.Find("InfoBox(Clone)"));
         }
-        
-        if(Input.GetMouseButtonDown(0))
+
+        if(Input.GetKeyDown(KeyCode.Keypad5))
         {
-            RaycastHit hit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity) && hit.transform.tag == "Enemy")
+            CmdReloadLevel();
+        }
+        
+        if(Input.GetMouseButtonDown(0) && GameObject.Find("InventoryScreen") == null)
+        { 
+            CharacterBase cb = GetComponent<CharacterBase>();
+
+            if(cb.attackTimer >= cb.weaponAttackDelay)
             {
-                SendAttack(hit.transform.gameObject.GetComponent<NetworkIdentity>().netId);
-            }
+                Debug.LogError("Attacking");
+                RaycastHit hit;
+                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity) && hit.transform.tag == "Enemy")
+                {
+                    if (Vector3.Distance(transform.position, hit.transform.position) < GetComponent<CharacterBase>().weaponRange)
+                        CmdAttack(hit.transform.gameObject.GetComponent<NetworkIdentity>().netId, GetComponent<NetworkIdentity>().netId);
+                    else
+                        Debug.Log("Not in range!");
+                }
+                cb.attackTimer = 0;
+            }  
         }
 
         if(Input.GetMouseButtonDown(1))
@@ -117,14 +123,47 @@ public class Player : NetworkBehaviour
         }
     }
 
-    void SendAttack(NetworkInstanceId targetID)
+    [Command]
+    void CmdReloadLevel()
+    {
+        NetworkManager.singleton.ServerChangeScene(NetworkManager.networkSceneName);
+    }
+
+    [ClientRpc]
+    void RpcReloadLevel()
+    {
+       
+    }
+
+    [Command]
+    private void CmdAttack(NetworkInstanceId targetID, NetworkInstanceId playerID)
     {
         if (!isLocalPlayer)
             return;
 
-        if(!Network.isServer)
+        GameObject enemy = NetworkServer.FindLocalObject(targetID);
+        CharacterBase player = NetworkServer.FindLocalObject(playerID).GetComponent<CharacterBase>();
+
+        EnemyBase eb = enemy.GetComponent<EnemyBase>();
+
+        int roll = (Random.Range(0, 20));
+        int modRoll = (roll + player.strength / 2);
+
+        //Debug.LogError(modRoll + " (" + roll + " + " + (player.strength / 2) + ")");
+        if (modRoll >= eb.armorRating)
         {
-            CmdSendAttack(targetID);
+            SendAttack(enemy.GetComponent<NetworkIdentity>().netId, roll == 20, GetComponent<CharacterBase>().weaponCritModifier);
+        }
+    }
+
+    void SendAttack(NetworkInstanceId targetID, bool isCrit, float critMult)
+    {
+        if (!isLocalPlayer)
+            return;
+
+        if (!Network.isServer)
+        {
+            CmdSendAttack(targetID, isCrit, critMult);
         }
     }
 
@@ -161,10 +200,13 @@ public class Player : NetworkBehaviour
     }
 
     [Command]
-    void CmdSendAttack(NetworkInstanceId targetID)
+    void CmdSendAttack(NetworkInstanceId targetID, bool isCrit, float critMult)
     {
         GameObject target = NetworkServer.FindLocalObject(targetID);
-        target.GetComponent<EnemyBase>().TakeDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(GetComponent<CharacterBase>().totalDamageMin, GetComponent<CharacterBase>().totalDamageMax)), transform.name);
+        if (isCrit)
+            target.GetComponent<EnemyBase>().TakeDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(GetComponent<CharacterBase>().totalDamageMin, GetComponent<CharacterBase>().totalDamageMax)) * critMult, transform.name);
+        else
+            target.GetComponent<EnemyBase>().TakeDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(GetComponent<CharacterBase>().totalDamageMin, GetComponent<CharacterBase>().totalDamageMax)), transform.name);
     }
 
     [Command]

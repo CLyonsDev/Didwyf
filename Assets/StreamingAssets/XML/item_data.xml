@@ -4,9 +4,11 @@
     <ItemEntry>
       <itemName>Steel Sword</itemName>
       <itemID>0</itemID>
-      <damageMin>10</damageMin>
-      <damageMax>20</damageMax>
+      <damageMin>1</damageMin>
+      <damageMax>6</damageMax>
       <critModifier>5</critModifier>
+      <weaponRange>3</weaponRange>
+      <attackDelay>0.5</attackDelay>
       <armor>0</armor>
       <type>Weapon</type>
       <value>25</value>
@@ -19,6 +21,8 @@
       <damageMin>0</damageMin>
       <damageMax>0</damageMax>
       <critModifier>0</critModifier>
+      <weaponRange>0</weaponRange>
+      <attackDelay>0</attackDelay>
       <armor>10</armor>
       <type>Armor</type>
       <value>10</value>
@@ -31,6 +35,8 @@
       <damageMin>0</damageMin>
       <damageMax>0</damageMax>
       <critModifier>0</critModifier>
+      <weaponRange>0</weaponRange>
+      <attackDelay>0</attackDelay>
       <armor>0</armor>
       <type>Consumable</type>
       <value>100</value>
@@ -43,6 +49,8 @@
       <damageMin>1</damageMin>
       <damageMax>5</damageMax>
       <critModifier>2</critModifier>
+      <weaponRange>2</weaponRange>
+      <attackDelay>0.25</attackDelay>
       <armor>0</armor>
       <type>Weapon</type>
       <value>5</value>
@@ -55,6 +63,8 @@
       <damageMin>0</damageMin>
       <damageMax>0</damageMax>
       <critModifier>0</critModifier>
+      <weaponRange>0</weaponRange>
+      <attackDelay>0</attackDelay>
       <armor>0</armor>
       <type>Misc</type>
       <value>0</value>
@@ -67,6 +77,8 @@
       <damageMin>1</damageMin>
       <damageMax>8</damageMax>
       <critModifier>2</critModifier>
+      <weaponRange>4</weaponRange>
+      <attackDelay>0.75</attackDelay>
       <armor>0</armor>
       <type>Weapon</type>
       <value>25</value>
@@ -79,6 +91,8 @@
       <damageMin>20</damageMin>
       <damageMax>30</damageMax>
       <critModifier>2</critModifier>
+      <weaponRange>3</weaponRange>
+      <attackDelay>2</attackDelay>
       <armor>0</armor>
       <type>Weapon</type>
       <value>50</value>

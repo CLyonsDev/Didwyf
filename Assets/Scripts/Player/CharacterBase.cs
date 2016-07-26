@@ -22,9 +22,15 @@ public class CharacterBase : NetworkBehaviour {
 
     [SyncVar] public int armorRating;
 
+    [SyncVar(hook = "UpdateDamage")] public ItemEntry equipedItem;
+
     [SyncVar] public float weaponDamageMin;
     [SyncVar] public float weaponDamageMax;
     [SyncVar] public float weaponCritModifier;
+    [SyncVar] public float weaponRange;
+    [SyncVar] public float weaponAttackDelay;
+
+    [HideInInspector] public float attackTimer = 0;
 
 
     [SyncVar] public float totalDamageMin;
@@ -45,12 +51,24 @@ public class CharacterBase : NetworkBehaviour {
 
         //Debug.LogWarning("Trying to randomize our stats. Our player's NetworkID is " + GetComponent<NetworkIdentity>().netId);
 
-        if(strength == 0)
+        if (strength == 0)
             CmdRandomizeStats(GetComponent<NetworkIdentity>().netId);
+        else
+            GenerateStats();
+
+        RecalculateDamage();
 
         //RandomizeStats();
         //GenerateStats();
         //CmdCalcStats(GetComponent<NetworkIdentity>().netId);
+    }
+
+    void Update()
+    {
+        if(attackTimer < weaponAttackDelay)
+            attackTimer += Time.deltaTime;
+        if (attackTimer > weaponAttackDelay)
+            attackTimer = weaponAttackDelay;
     }
 
     void UpdateStr(int str)
@@ -81,6 +99,31 @@ public class CharacterBase : NetworkBehaviour {
         GenerateStats();
     }
 
+    void UpdateDamage(ItemEntry newItem)
+    {
+        equipedItem = newItem;
+        RecalculateDamage();
+    }
+
+    public void EquipItem(ItemEntry itemToEquip)
+    {
+        CmdEquipItem(GetComponent<NetworkIdentity>().netId, itemToEquip);
+        //equipedItem = itemToEquip;
+    }
+
+    [Command]
+    void CmdEquipItem(NetworkInstanceId playerID, ItemEntry itemToEquip)
+    {
+        RpcEquipItem(playerID, itemToEquip);
+    }
+
+    [ClientRpc]
+    void RpcEquipItem(NetworkInstanceId playerID, ItemEntry itemToEquip)
+    {
+        GameObject target = ClientScene.FindLocalObject(playerID);
+        target.GetComponent<CharacterBase>().equipedItem = itemToEquip;
+    }
+
     [Command]
     public void CmdRandomizeStats(NetworkInstanceId playerID)
     {
@@ -93,7 +136,7 @@ public class CharacterBase : NetworkBehaviour {
 
         GameObject player = ClientScene.FindLocalObject(playerID);
         CharacterBase cb = player.GetComponent<CharacterBase>();
-        Debug.LogWarning("Cound not find a player with the NetworkInstanceID of " + playerID);
+        //Debug.LogWarning("Cound not find a player with the NetworkInstanceID of " + playerID);
 
         cb.strength = Random.Range(statMin, statMax);
         cb.dexterity = Random.Range(statMin, statMax);
@@ -137,10 +180,27 @@ public class CharacterBase : NetworkBehaviour {
 
         cb.totalDamageMin = cb.weaponDamageMin + cb.strength;
         cb.totalDamageMax = cb.weaponDamageMax + cb.strength;
+    }
 
-        //Debug.Log(cb.currentHealth + " / " + cb.maxHealth);
-        //Debug.Log(cb.evadeChance);
-        //Debug.Log(cb.armorRating);
+    private void RecalculateDamage()
+    {
+        if (equipedItem.damageMin != 0 && equipedItem.damageMax != 0)
+        {
+            weaponRange = equipedItem.weaponRange;
+            weaponDamageMin = equipedItem.damageMin;
+            weaponDamageMax = equipedItem.damageMax;
+            weaponAttackDelay = equipedItem.attackDelay;
+        }
+        else
+        {
+            weaponRange = 1f;
+            weaponDamageMin = 1;
+            weaponDamageMax = 4;
+            weaponAttackDelay = 0.75f;
+        }
+
+        totalDamageMin = weaponDamageMin + (strength / 2);
+        totalDamageMax = weaponDamageMax + (strength / 2);
     }
 
     private void GenerateStatsNoNetworking()
@@ -150,15 +210,10 @@ public class CharacterBase : NetworkBehaviour {
         armorRating = evadeChance;
 
         currentHealth = maxHealth;
-
-        totalDamageMin = weaponDamageMin + strength;
-        totalDamageMax = weaponDamageMax + strength;
     }
 
     public void GenerateStats()
     {
-        Debug.Log("GenerateStats()");
-        //CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
         GenerateStatsNoNetworking();
     }
 
@@ -212,7 +267,7 @@ public class CharacterBase : NetworkBehaviour {
 
         GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
 
-        Debug.Log("Took " + damage + " damage from \"" + source + "\"!");
+        Debug.Log(transform.name + " took " + damage + " damage from \"" + source + "\"!");
         currentHealth -= damage;
         Debug.Log(currentHealth + " / " + maxHealth);
         if(currentHealth <= 0)

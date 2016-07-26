@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Variables xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <charType>Player</charType>
+  <charName>Player_Lvl1</charName>
+  <critMult>2</critMult>
+  <weaponDamageMin>1</weaponDamageMin>
+  <weaponDamageMax>6</weaponDamageMax>
+  <str>6</str>
+  <dex>5</dex>
+  <ints>5</ints>
+  <vit>12</vit>
+</Variables>
