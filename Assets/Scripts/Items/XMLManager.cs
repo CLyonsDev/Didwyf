@@ -54,6 +54,7 @@ public class ItemEntry
     public int damageMin;
     public int damageMax;
     public int critModifier;
+    public float weaponRange;
     public int armor;
 
     public Type type;

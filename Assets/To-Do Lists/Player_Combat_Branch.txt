@@ -1,8 +1,8 @@
 TODO:
 - Equipping weapons
 - Weapon ranges
-  - Player attack range
-- Critical hits
+  - Player attack range [X]
+- Critical hits [X]
 - Attacking VS armor class [X]
 
 //Third party stuff//

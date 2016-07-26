@@ -22,6 +22,8 @@ public class CharacterBase : NetworkBehaviour {
 
     [SyncVar] public int armorRating;
 
+    [SyncVar(hook = "UpdateDamage")] public ItemEntry equipedItem;
+
     [SyncVar] public float weaponDamageMin;
     [SyncVar] public float weaponDamageMax;
     [SyncVar] public float weaponCritModifier;
@@ -82,6 +84,31 @@ public class CharacterBase : NetworkBehaviour {
         //Debug.Log("Updating Stats");
         vitality = vit;
         GenerateStats();
+    }
+
+    void UpdateDamage(ItemEntry newItem)
+    {
+        equipedItem = newItem;
+        GenerateStats();
+    }
+
+    public void EquipItem(ItemEntry itemToEquip)
+    {
+        CmdEquipItem(GetComponent<NetworkIdentity>().netId, itemToEquip);
+        //equipedItem = itemToEquip;
+    }
+
+    [Command]
+    void CmdEquipItem(NetworkInstanceId playerID, ItemEntry itemToEquip)
+    {
+        RpcEquipItem(playerID, itemToEquip);
+    }
+
+    [ClientRpc]
+    void RpcEquipItem(NetworkInstanceId playerID, ItemEntry itemToEquip)
+    {
+        GameObject target = ClientScene.FindLocalObject(playerID);
+        target.GetComponent<CharacterBase>().equipedItem = itemToEquip;
     }
 
     [Command]
@@ -154,8 +181,21 @@ public class CharacterBase : NetworkBehaviour {
 
         currentHealth = maxHealth;
 
-        totalDamageMin = weaponDamageMin + strength;
-        totalDamageMax = weaponDamageMax + strength;
+        if (equipedItem.damageMin != 0 && equipedItem.damageMax != 0)
+        {
+            weaponRange = equipedItem.weaponRange;
+            weaponDamageMin = equipedItem.damageMin;
+            weaponDamageMax = equipedItem.damageMax;
+        }
+        else
+        {
+            weaponRange = 1f;
+            weaponDamageMin = 1;
+            weaponDamageMax = 4;
+        }
+
+        totalDamageMin = weaponDamageMin + (strength / 2);
+        totalDamageMax = weaponDamageMax + (strength / 2);
     }
 
     public void GenerateStats()

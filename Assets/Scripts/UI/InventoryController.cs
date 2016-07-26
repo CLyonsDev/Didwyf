@@ -52,6 +52,7 @@ public class InventoryController : NetworkBehaviour {
         else if (Input.GetMouseButtonUp(0) && selectedItem != null)
         {
             selectedItem.GetComponent<Image>().raycastTarget = true;
+
             if (selectedItem == null)
                 selectedItem.parent = originalSlot;
             else
@@ -67,6 +68,16 @@ public class InventoryController : NetworkBehaviour {
             }
             selectedItem.localPosition = Vector3.zero;
 
+            if(originalSlot.transform.tag == "CharacterEquipmentSlot")
+            {
+                EquipItem(new ItemEntry());
+            }
+
+            if (selectedSlot.transform.tag == "CharacterEquipmentSlot") //If we are placing the item into a "Hand Slot"
+            {
+                EquipItem(selectedItem.GetComponent<NewItem>().currentItem);
+            }
+
             if (selectedSlot.transform.tag == "Trash")
             {
                 Debug.LogWarning("Destroying Item");
@@ -74,6 +85,25 @@ public class InventoryController : NetworkBehaviour {
                 Destroy(selectedItem.gameObject);
             }
         }
+    }
+
+    void EquipItem(ItemEntry equipedItem)
+    {
+        localPlayer.GetComponent<CharacterBase>().EquipItem(equipedItem);
+    }
+
+    [Command]
+    void CmdEquipItem(NetworkInstanceId playerID, ItemEntry equipedItem)
+    {
+        RpcEquipItem(playerID, equipedItem);
+    }
+
+    [ClientRpc]
+    void RpcEquipItem(NetworkInstanceId playerID, ItemEntry equipedItem)
+    {
+        GameObject player = ClientScene.FindLocalObject(playerID);
+
+        player.GetComponent<CharacterBase>().equipedItem = equipedItem;
     }
 
     IEnumerator LateStart()
