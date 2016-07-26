@@ -53,9 +53,9 @@ public class CharacterBase : NetworkBehaviour {
 
         if (strength == 0)
             CmdRandomizeStats(GetComponent<NetworkIdentity>().netId);
-        else
-            GenerateStats();
+        
 
+        CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
         RecalculateDamage();
 
         //RandomizeStats();
