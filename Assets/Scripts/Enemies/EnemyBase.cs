@@ -160,7 +160,16 @@ public class EnemyBase : NetworkBehaviour
                 }
                 else if (entry.Name == "charType")
                 {
-                    // Set creature type. // 
+                    if (entry.InnerText.ToLower() == "monster" || entry.InnerText.ToLower() == "enemy" || entry.InnerText.ToLower() == "creature")
+                    {
+                        thisCreature.gameObject.layer = LayerMask.NameToLayer("Enemy");
+                    } else if (entry.InnerText.ToLower() == "player" || entry.InnerText.ToLower() == "hero" || entry.InnerText.ToLower() == "character")
+                    {
+                        thisCreature.gameObject.layer = LayerMask.NameToLayer("Player");
+                    }else if (entry.InnerText.ToLower() == "npc")
+                    {
+                        thisCreature.gameObject.layer = LayerMask.NameToLayer("Npc");
+                    }
                 }
             }
         }
