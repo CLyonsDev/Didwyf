@@ -47,10 +47,10 @@
       <itemName>Simple Knife</itemName>
       <itemID>3</itemID>
       <damageMin>1</damageMin>
-      <damageMax>5</damageMax>
+      <damageMax>3</damageMax>
       <critModifier>2</critModifier>
       <weaponRange>2</weaponRange>
-      <attackDelay>0.25</attackDelay>
+      <attackDelay>0.4</attackDelay>
       <armor>0</armor>
       <type>Weapon</type>
       <value>5</value>
