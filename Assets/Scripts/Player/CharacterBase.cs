@@ -93,7 +93,7 @@ public class CharacterBase : NetworkBehaviour {
 
         GameObject player = ClientScene.FindLocalObject(playerID);
         CharacterBase cb = player.GetComponent<CharacterBase>();
-        Debug.LogWarning("Cound not find a player with the NetworkInstanceID of " + playerID);
+        //Debug.LogWarning("Cound not find a player with the NetworkInstanceID of " + playerID);
 
         cb.strength = Random.Range(statMin, statMax);
         cb.dexterity = Random.Range(statMin, statMax);
@@ -157,7 +157,7 @@ public class CharacterBase : NetworkBehaviour {
 
     public void GenerateStats()
     {
-        Debug.Log("GenerateStats()");
+        //Debug.Log("GenerateStats()");
         //CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
         GenerateStatsNoNetworking();
     }

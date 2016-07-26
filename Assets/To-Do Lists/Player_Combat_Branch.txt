@@ -3,4 +3,9 @@ TODO:
 - Weapon ranges
   - Player attack range
 - Critical hits
-- Attacking VS armor class
+- Attacking VS armor class [X]
+
+//Third party stuff//
+
+- Stat Calculator esque program for weapons
+- Stat Calculator esque program for armor

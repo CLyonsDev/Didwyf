@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Variables xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <charType>Monster</charType>
+  <charName>Goblin</charName>
+  <critMult>2</critMult>
+  <weaponDamageMin>1</weaponDamageMin>
+  <weaponDamageMax>8</weaponDamageMax>
+  <str>10</str>
+  <dex>12</dex>
+  <ints>12</ints>
+  <vit>15</vit>
+</Variables>

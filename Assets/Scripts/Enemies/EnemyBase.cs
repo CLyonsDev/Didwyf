@@ -1,9 +1,17 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
+using System.Collections.Generic;
+using System.Xml;
+using System.Xml.Serialization;
+using System.IO;
+
 
 public class EnemyBase : NetworkBehaviour
 {
+    public bool useStatSheet = false;
+    public string statSheetName = "";
+
     /*attributes*/
     [SyncVar(hook = "UpdateStr")]
     public int strength;
@@ -27,7 +35,7 @@ public class EnemyBase : NetworkBehaviour
 
     /*artificial stats*/
     [SyncVar]
-    public string playerName;
+    public string monsterName;
 
     [SyncVar]
     public int armorRating;
@@ -50,13 +58,18 @@ public class EnemyBase : NetworkBehaviour
 
     public MeshRenderer[] meshRenderers;
 
+    Dictionary<string, int> obj;
+
     void Start()
     {
         meshRenderers = GetComponentsInChildren<MeshRenderer>();
 
         //Debug.LogWarning("Trying to randomize our stats. Our player's NetworkID is " + GetComponent<NetworkIdentity>().netId);
 
-        GenerateStats();
+        if (useStatSheet && (statSheetName != null && statSheetName != ""))
+            CmdGenerateStatsFromSheet(GetComponent<NetworkIdentity>().netId);
+        else
+            GenerateStats();
 
         //RandomizeStats();
         //GenerateStats();
@@ -89,6 +102,72 @@ public class EnemyBase : NetworkBehaviour
         //Debug.Log("Updating Stats");
         vitality = vit;
         GenerateStats();
+    }
+
+    [Command]
+    public void CmdGenerateStatsFromSheet(NetworkInstanceId thisID)
+    {
+        RpcGenerateStatsFromSheet(thisID);
+    }
+
+    [ClientRpc]
+    public void RpcGenerateStatsFromSheet(NetworkInstanceId thisID)
+    {
+        //Debug.LogWarning("RpcGenerateStatsFromSheet");
+        EnemyBase thisCreature = ClientScene.FindLocalObject(thisID).GetComponent<EnemyBase>();
+
+        XmlDocument creatureDoc = new XmlDocument();
+        creatureDoc.Load(Application.dataPath + "/StreamingAssets/Stat Calculator Sheets/Monsters/" + statSheetName + ".xml");
+
+        XmlNodeList entries = creatureDoc.GetElementsByTagName("Variables");
+
+        foreach (XmlNode vars in entries)
+        {
+            XmlNodeList entryContent = vars.ChildNodes;
+            obj = new Dictionary<string, int>();
+
+            foreach (XmlNode entry in entryContent)
+            {
+                if (entry.Name == "str")
+                {
+                    thisCreature.strength = int.Parse(entry.InnerText);
+                }else if (entry.Name == "dex")
+                {
+                    thisCreature.dexterity = int.Parse(entry.InnerText);
+                }
+                else if (entry.Name == "ints")
+                {
+                    thisCreature.intelligence = int.Parse(entry.InnerText);
+                }
+                else if (entry.Name == "vit")
+                {
+                    thisCreature.vitality = int.Parse(entry.InnerText);
+                }
+                else if (entry.Name == "weaponDamageMin")
+                {
+                    thisCreature.weaponDamageMin = int.Parse(entry.InnerText);
+                }
+                else if (entry.Name == "weaponDamageMax")
+                {
+                    thisCreature.weaponDamageMax = int.Parse(entry.InnerText);
+                }else if(entry.Name == "critMult")
+                {
+                    thisCreature.weaponCritModifier = int.Parse(entry.InnerText);
+                }
+                else if (entry.Name == "charName")
+                {
+                    thisCreature.monsterName = entry.InnerText;
+                }
+                else if (entry.Name == "charType")
+                {
+                    // Set creature type. // 
+                }
+            }
+        }
+        if(!string.IsNullOrEmpty(thisCreature.monsterName))
+        {
+            thisCreature.transform.name = thisCreature.monsterName;
+        }
     }
 
     [Command]
@@ -160,7 +239,7 @@ public class EnemyBase : NetworkBehaviour
 
     public void GenerateStats()
     {
-        Debug.Log("GenerateStats()");
+        //Debug.Log("GenerateStats()");
         //CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
         GenerateStatsNoNetworking();
     }

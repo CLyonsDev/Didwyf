@@ -8,7 +8,7 @@ public class EnemyNetworkManager : NetworkBehaviour {
 	void Start () {
         if(NetworkServer.active)
         {
-            Debug.Log("PalapaKalapa");
+            //Debug.Log("PalapaKalapa");
             GetComponent<NavMeshAgent>().enabled = true;
             GetComponent<FieldOfView>().enabled = true;
             GetComponent<EnemyAI>().enabled = true;
