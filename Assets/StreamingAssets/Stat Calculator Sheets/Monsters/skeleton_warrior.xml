@@ -6,7 +6,7 @@
   <weaponDamageMin>1</weaponDamageMin>
   <weaponDamageMax>3</weaponDamageMax>
   <str>3</str>
-  <dex>1</dex>
+  <dex>10</dex>
   <ints>2</ints>
   <vit>12</vit>
 </Variables>
