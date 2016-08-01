@@ -91,6 +91,8 @@ public class ArrowLogic : NetworkBehaviour {
                 }
             }
         }
+
+        DisableCollision();
     }
 
     void OnCollisionEnter(Collision col)

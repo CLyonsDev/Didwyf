@@ -1,2 +1,3 @@
 External programs for item creation.
 Player 'item pick-up' range
+Have the attack script automatically determine chracter type.

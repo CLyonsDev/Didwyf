@@ -57,6 +57,9 @@ public class EnemyAI : NetworkBehaviour {
         if (target == null)
             return;
 
+        if (GetComponent<EnemyBase>().isDead)
+            return;
+
         RotateTowards(target);
 
         if (patrol && !attackingPlayer)
@@ -104,7 +107,7 @@ public class EnemyAI : NetworkBehaviour {
         int roll;
         int modRoll;
 
-        roll = (Random.Range(1, 20));
+        roll = 1; //(Random.Range(1, 20));
 
         if (!unitIsRanged)
             modRoll = roll + (GetComponent<EnemyBase>().strength / 2);
@@ -132,12 +135,20 @@ public class EnemyAI : NetworkBehaviour {
 
     private void MeleeHit(bool hits, bool isCrit)
     {
+        float damage = 0f;
+
         if(hits)
         {
             if (isCrit)
-                target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)) * GetComponent<EnemyBase>().weaponCritModifier, enemyName);
+            {
+                damage = Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)) * GetComponent<EnemyBase>().weaponCritModifier;
+                target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, damage, enemyName);
+            }   
             else
-                target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), enemyName);
+            {
+                damage = Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax));
+                target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, damage, enemyName);
+            }
         }
     }
 

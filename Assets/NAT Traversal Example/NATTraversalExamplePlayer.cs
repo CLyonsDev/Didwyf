@@ -10,7 +10,7 @@ public class NATTraversalExamplePlayer : NetworkBehaviour
 
     void Update()
     {
-        if (!isLocalPlayer) return;
+        /*if (!isLocalPlayer) return;
 
         Vector3 dir = Vector3.zero;
 
@@ -24,7 +24,7 @@ public class NATTraversalExamplePlayer : NetworkBehaviour
         if (otherOb && dir != Vector3.zero)
         {
             otherOb.transform.position = transform.position + dir;
-        }
+        }*/
     }
 
     [ClientRpc]
