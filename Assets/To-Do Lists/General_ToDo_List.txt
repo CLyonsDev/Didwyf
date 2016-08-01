@@ -1,4 +1,4 @@
 External programs for item creation.
-Player 'item pick-up' range
+Player 'item pick-up' range [X]
 Have the attack script automatically determine chracter type.
 Modify character sheet generator so that you can enter negatives and decimals (maybe).
