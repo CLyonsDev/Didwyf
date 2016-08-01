@@ -30,6 +30,8 @@ public class CharacterBase : NetworkBehaviour {
     [SyncVar] public float weaponRange;
     [SyncVar] public float weaponAttackDelay;
 
+    [SyncVar] public float grabRange;
+
     [HideInInspector] public float attackTimer = 0;
 
 

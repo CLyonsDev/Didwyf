@@ -96,13 +96,16 @@ public class Player : NetworkBehaviour
 
         if(Input.GetMouseButtonDown(1))
         {
-            Debug.Log("Looking for loot");
+            //Debug.Log("Looking for loot");
             RaycastHit hit;
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity) && hit.transform.tag == "Loot")
             {
-                int index = hit.transform.gameObject.GetComponent<CollectableItem>().itemIndex;
-                RequestItem(GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, hit.transform.gameObject.GetComponent<NetworkIdentity>().netId,index);
-                StartCoroutine(RefreshInventory());
+                if(Vector3.Distance(transform.position, hit.transform.position) <= GetComponent<CharacterBase>().grabRange)
+                {
+                    int index = hit.transform.gameObject.GetComponent<CollectableItem>().itemIndex;
+                    RequestItem(GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, hit.transform.gameObject.GetComponent<NetworkIdentity>().netId, index);
+                    StartCoroutine(RefreshInventory());
+                }   
             }
         }
     }
