@@ -107,7 +107,7 @@ public class EnemyAI : NetworkBehaviour {
         int roll;
         int modRoll;
 
-        roll = 1; //(Random.Range(1, 20));
+        roll = (Random.Range(1, 20));
 
         if (!unitIsRanged)
             modRoll = roll + (GetComponent<EnemyBase>().strength / 2);
@@ -129,27 +129,27 @@ public class EnemyAI : NetworkBehaviour {
         }
         else
         {
-            MeleeHit(modRoll >= ac || roll == 20, roll == 20);
+            MeleeHit(roll == 20, modRoll);
         }
     }
 
-    private void MeleeHit(bool hits, bool isCrit)
+    private void MeleeHit(bool isCrit, int modRoll)
     {
         float damage = 0f;
 
-        if(hits)
+        GameObject gameManager = GameObject.Find("GameManager");
+        if (isCrit)
         {
-            if (isCrit)
-            {
-                damage = Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)) * GetComponent<EnemyBase>().weaponCritModifier;
-                target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, damage, enemyName);
-            }   
-            else
-            {
-                damage = Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax));
-                target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, damage, enemyName);
-            }
+            damage = Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)) * GetComponent<EnemyBase>().weaponCritModifier;
+            //target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, damage, enemyName);
+        }   
+        else
+        {
+            damage = Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax));
+            //target.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, damage, enemyName);
         }
+
+        target.GetComponent<CharacterBase>().CmdReportAttack(GetComponent<NetworkIdentity>().netId, target.GetComponent<NetworkIdentity>().netId, gameManager.GetComponent<NetworkIdentity>().netId, modRoll, damage, transform.name);
     }
 
     private void RangedHit(bool hits, bool isCrit)

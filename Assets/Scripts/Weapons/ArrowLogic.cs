@@ -82,13 +82,13 @@ public class ArrowLogic : NetworkBehaviour {
             {
                 transform.SetParent(target, true);
 
-                if (NetworkServer.active == true)
+                /*if (NetworkServer.active == true)
                 {
                     if (isCrit)
                         target.gameObject.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)) * GetComponent<EnemyBase>().weaponCritModifier, ai.enemyName);
                     else
                         target.gameObject.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), ai.enemyName);
-                }
+                }*/
             }
         }
 

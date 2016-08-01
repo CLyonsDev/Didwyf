@@ -44,7 +44,7 @@ public class Player : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.B))
         {
             Debug.Log("Dealing 5 damage to NetID " + GetComponent<NetworkIdentity>().netId);
-            GetComponent<CharacterBase>().CmdReportDamage(GetComponent<NetworkIdentity>().netId, 5, "Environment");
+            GetComponent<CharacterBase>().CmdReportAttack(GetComponent<NetworkIdentity>().netId, GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, 99999, 5, "Wrathful Diety");
         }
 
         if(Input.GetKeyDown(KeyCode.V))
