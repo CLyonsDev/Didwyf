@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Variables xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <armorProtection>0</armorProtection>
+  <maxEvade>0</maxEvade>
+  <charType>NPC</charType>
+  <charName>Spaghetti Slinger</charName>
+  <critMult>99</critMult>
+  <weaponDamageMin>10</weaponDamageMin>
+  <weaponDamageMax>25</weaponDamageMax>
+  <str>1</str>
+  <dex>3</dex>
+  <ints>0</ints>
+  <vit>1</vit>
+</Variables>

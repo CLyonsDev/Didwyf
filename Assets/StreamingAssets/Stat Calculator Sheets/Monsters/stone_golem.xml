@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Variables xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <armorProtection>15</armorProtection>
+  <maxEvade>5</maxEvade>
+  <charType>Enemy</charType>
+  <charName>Stone Golem</charName>
+  <critMult>2</critMult>
+  <weaponDamageMin>1</weaponDamageMin>
+  <weaponDamageMax>12</weaponDamageMax>
+  <str>12</str>
+  <dex>5</dex>
+  <ints>7</ints>
+  <vit>25</vit>
+</Variables>

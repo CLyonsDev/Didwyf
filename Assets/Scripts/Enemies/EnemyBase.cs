@@ -381,14 +381,15 @@ public class EnemyBase : NetworkBehaviour
             mr.enabled = false;
         }
 
-        if (NetworkServer.active)
-        {
+        //if (NetworkServer.active)
+        //{
             targetPlayer.GetComponent<EnemyAI>().enabled = false;
             //targetPlayer.GetComponent<NavMeshAgent>().enabled = false;
             targetPlayer.GetComponent<FieldOfView>().enabled = false;
             targetPlayer.GetComponent<NavMeshAgent>().ResetPath();
             NetworkServer.Destroy(targetPlayer);
-        }
+            Destroy(targetPlayer);
+        //}
     }
 
     [ClientRpc]

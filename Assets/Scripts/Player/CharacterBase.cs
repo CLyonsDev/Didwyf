@@ -30,6 +30,8 @@ public class CharacterBase : NetworkBehaviour {
     [SyncVar] public float weaponRange;
     [SyncVar] public float weaponAttackDelay;
 
+    [SyncVar] public float grabRange;
+
     [HideInInspector] public float attackTimer = 0;
 
 
@@ -218,12 +220,36 @@ public class CharacterBase : NetworkBehaviour {
     }
 
 
-    [Command]
+    /*[Command]
     public void CmdReportDamage(NetworkInstanceId playerID, float damage, string source)
     {
         Debug.Log("[COMMAND] NetID " + playerID + " has been dealt " + damage + " damage by " + source + ".");
         GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
         targetPlayer.GetComponent<CharacterBase>().TakeDamage(playerID, damage, source);
+    }*/
+
+    [Command]
+    public void CmdReportAttack(NetworkInstanceId attackerID, NetworkInstanceId playerID, NetworkInstanceId gameManagerID, float modRoll, float damage, string source)
+    {
+        GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
+        RpcReportAttack(attackerID, attackerID, gameManagerID, modRoll, damage, source);
+        targetPlayer.GetComponent<CharacterBase>().TakeDamage(playerID, damage, source);
+    }
+
+    [ClientRpc]
+    private void RpcReportAttack(NetworkInstanceId attackerID, NetworkInstanceId playerID, NetworkInstanceId gameManagerID, float modRoll, float damage, string source)
+    {
+        GameObject gameManager = ClientScene.FindLocalObject(gameManagerID);
+        Transform player = ClientScene.FindLocalObject(playerID).transform;
+
+        bool attackHits = false;
+
+        if(modRoll >= armorRating)
+        {
+            attackHits = true;
+        }
+
+        gameManager.GetComponent<CombatPopup>().DisplayDamage(attackHits, damage, 2, player.position);
     }
 
     [Command]

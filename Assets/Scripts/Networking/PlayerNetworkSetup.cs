@@ -6,13 +6,19 @@ public class PlayerNetworkSetup : NetworkBehaviour {
 
 	// Use this for initialization
 	void Start() {
-        if(isLocalPlayer)
+        /*
+        ////////////////////////////////////////////////////////////////////////////////////////
+        |TO-DO: MAKE A SINGLE SCRIPT THAT WHEN ENABLED ENABLES ALL OF THE BELOW ON AWAKE/START.|
+        \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+        */
+        if (isLocalPlayer)
         {
             GetComponent<Movement>().enabled = true;
             GetComponent<Rotation>().enabled = true;
             GetComponent<Player>().enabled = true;
             //GetComponent<Player>().enabled = false;
             GetComponent<UIStatManager>().enabled = true;
+            GetComponent<Attack>().enabled = true;
             transform.tag = "LocalPlayer";
         }
         else
