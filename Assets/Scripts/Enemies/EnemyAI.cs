@@ -125,7 +125,7 @@ public class EnemyAI : NetworkBehaviour {
 
         if (unitIsRanged)
         {
-            RangedHit(modRoll >= ac || roll == 20, roll == 20);
+            RangedHit(modRoll >= ac || roll == 20, roll == 20, modRoll);
         }
         else
         {
@@ -152,12 +152,13 @@ public class EnemyAI : NetworkBehaviour {
         target.GetComponent<CharacterBase>().CmdReportAttack(GetComponent<NetworkIdentity>().netId, target.GetComponent<NetworkIdentity>().netId, gameManager.GetComponent<NetworkIdentity>().netId, modRoll, damage, transform.name);
     }
 
-    private void RangedHit(bool hits, bool isCrit)
+    private void RangedHit(bool hits, bool isCrit, float modRoll)
     {
         weapon = transform.GetChild(0);
         GameObject projectileSpawner = weapon.transform.GetChild(0).gameObject;
         GameObject proj = Instantiate(projectile, projectileSpawner.transform.position, transform.rotation) as GameObject;
         proj.GetComponent<ArrowLogic>().target = target;
+        proj.GetComponent<ArrowLogic>().modRoll = modRoll;
         proj.GetComponent<ArrowLogic>().eb = GetComponent<EnemyBase>();
         proj.GetComponent<ArrowLogic>().ai = GetComponent<EnemyAI>();
         NetworkServer.Spawn(proj);

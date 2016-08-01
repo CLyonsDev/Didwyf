@@ -17,6 +17,8 @@ public class ArrowLogic : NetworkBehaviour {
 
     [SyncVar] public bool isCrit = false;
 
+    [SyncVar] public float modRoll = 0;
+
     [SyncVar] bool moving = true;
 
 	// Use this for initialization
@@ -75,6 +77,7 @@ public class ArrowLogic : NetworkBehaviour {
 
         if (shouldHit)
         {
+            float damage;
             rb.isKinematic = true;
             GetComponent<MeshCollider>().enabled = false;
             transform.Rotate(new Vector3(Random.Range(-5, 5), Random.Range(-5, 5), Random.Range(-5, 5)));
@@ -82,13 +85,15 @@ public class ArrowLogic : NetworkBehaviour {
             {
                 transform.SetParent(target, true);
 
-                /*if (NetworkServer.active == true)
+                if (NetworkServer.active == true)
                 {
                     if (isCrit)
-                        target.gameObject.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)) * GetComponent<EnemyBase>().weaponCritModifier, ai.enemyName);
+                        damage = Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax));
                     else
-                        target.gameObject.GetComponent<CharacterBase>().CmdReportDamage(target.GetComponent<NetworkIdentity>().netId, Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax)), ai.enemyName);
-                }*/
+                        damage = Mathf.Round(Random.Range(eb.totalDamageMin, eb.totalDamageMax));
+
+                    target.gameObject.GetComponent<CharacterBase>().CmdReportAttack(GetComponent<NetworkIdentity>().netId, target.gameObject.GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, modRoll, damage, "an arrow");
+                }
             }
         }
 
