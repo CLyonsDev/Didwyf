@@ -50,11 +50,11 @@ public class SpinnyPuzzle : NetworkBehaviour {
             GameObject localPlayer = GameObject.FindGameObjectWithTag("LocalPlayer");
             GameObject[] otherPlayers = GameObject.FindGameObjectsWithTag("Player");
 
-            localPlayer.GetComponent<CharacterBase>().StartDoT(localPlayer.GetComponent<NetworkIdentity>().netId, localPlayer.GetComponent<NetworkIdentity>().netId, Mathf.Round(damage), 100, 1f, "Fire Trap");
+            localPlayer.GetComponent<CharacterBase>().StartDoT(localPlayer.GetComponent<NetworkIdentity>().netId, localPlayer.GetComponent<NetworkIdentity>().netId, 2, 5, 100, 1f, "Fire Trap");
             localPlayer.GetComponent<CharacterBase>().ClearInventory();
             foreach (GameObject target in otherPlayers)
             {
-                target.GetComponent<CharacterBase>().StartDoT(localPlayer.GetComponent<NetworkIdentity>().netId, localPlayer.GetComponent<NetworkIdentity>().netId, Mathf.Round(damage), 100, 1f, "Fire Trap");
+                target.GetComponent<CharacterBase>().StartDoT(localPlayer.GetComponent<NetworkIdentity>().netId, localPlayer.GetComponent<NetworkIdentity>().netId, 2, 5, 100, 1f, "Fire Trap");
                 target.GetComponent<CharacterBase>().ClearInventory();
             }
         }

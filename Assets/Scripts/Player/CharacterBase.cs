@@ -282,34 +282,35 @@ public class CharacterBase : NetworkBehaviour {
     #endregion
 
     #region Damage Over Time
-    public void StartDoT(NetworkInstanceId GameManagerID, NetworkInstanceId playerID, float damage, float duration, float interval, string source)
+    public void StartDoT(NetworkInstanceId GameManagerID, NetworkInstanceId playerID, float damageMin, float damageMax, float duration, float interval, string source)
     {
-        CmdApplyDoT(GameManagerID, playerID, damage, duration, interval, source);
+        CmdApplyDoT(GameManagerID, playerID, damageMin, damageMax, duration, interval, source);
     }
 
     [Command]
-    public void CmdApplyDoT(NetworkInstanceId GameManagerID, NetworkInstanceId playerID, float damage, float duration, float interval, string source)
+    public void CmdApplyDoT(NetworkInstanceId GameManagerID, NetworkInstanceId playerID, float damageMin, float damageMax, float duration, float interval, string source)
     {
         //GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
-        RpcApplyDoT(GameManagerID, playerID, damage, duration, interval, source);
+        RpcApplyDoT(GameManagerID, playerID, damageMin, damageMax, duration, interval, source);
     }
 
     [ClientRpc]
-    void RpcApplyDoT(NetworkInstanceId GameManagerID, NetworkInstanceId playerID, float damage, float duration, float interval, string source)
+    void RpcApplyDoT(NetworkInstanceId GameManagerID, NetworkInstanceId playerID, float damageMin, float damageMax, float duration, float interval, string source)
     {
         GameObject target = ClientScene.FindLocalObject(playerID);
         GameObject gameManager = ClientScene.FindLocalObject(GameManagerID);
 
-        target.GetComponent<CharacterBase>().StartCoroutine(ApplyDamageOverTime(damage, duration, interval, source));
+        target.GetComponent<CharacterBase>().StartCoroutine(ApplyDamageOverTime(damageMin, damageMax, duration, interval, source));
     }
 
-    IEnumerator ApplyDamageOverTime(float damage, float duration, float interval, string source)
+    IEnumerator ApplyDamageOverTime(float damageMin, float damageMax, float duration, float interval, string source)
     {
         float timeElapsed = 0.0f;
         timeElapsed += Time.deltaTime;
         while (timeElapsed < duration)
         {
             yield return new WaitForSeconds(interval);
+            float damage = Mathf.Round(Random.Range(damageMin, damageMax));
             TakeDamage(GetComponent<NetworkIdentity>().netId, damage, source);
             GameObject.Find("GameManager").GetComponent<CombatPopup>().DisplayDamage(true, damage, 2, transform.position);
         }
