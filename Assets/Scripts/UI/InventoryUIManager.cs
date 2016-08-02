@@ -9,6 +9,8 @@ public class InventoryUIManager : NetworkBehaviour {
 
     public GameObject localPlayer, slotPrefab, itemPrefab;
 
+    Transform removedTrans; //Triggered
+
     public List<GameObject> inventorySlots = new List<GameObject>();
 
     public List<ItemEntry> playerInv = new List<ItemEntry>();
@@ -23,7 +25,7 @@ public class InventoryUIManager : NetworkBehaviour {
     // Use this for initialization
     void Start () {
 
-        openSlots = inventorySlots.Count;
+        openSlots = inventorySlots.Count - 1;
 
         loopCount = 0;
 
@@ -31,17 +33,22 @@ public class InventoryUIManager : NetworkBehaviour {
 
         GrabInventorySlots();
 
-        RefreshInventory();
+        RefreshInventory(false);
     }
 	
 	// Update is called once per frame
 	void Update () {
 
+        if(removedTrans == null)
+        {
+            removedTrans = GameObject.Find("RemovedItems").transform;
+        }
+
         if (localPlayer == null)
         {
             localPlayer = GameObject.FindGameObjectWithTag("LocalPlayer");
             GrabInventorySlots();
-            RefreshInventory();
+            RefreshInventory(false);
         }
         if (inventorySlots.Count == 0)
             GrabInventorySlots();
@@ -52,12 +59,12 @@ public class InventoryUIManager : NetworkBehaviour {
             else
             {
                 openSlots = inventorySlots.Count;
-                RefreshInventory();
+                RefreshInventory(false);
             }
         }
 
         if (Input.GetKeyDown(KeyCode.H))
-            RefreshInventory();
+            RefreshInventory(false);
     }
 
     void GrabInventorySlots()
@@ -68,7 +75,7 @@ public class InventoryUIManager : NetworkBehaviour {
         //inventorySlots.Sort(IComparer<>);
     }
 
-    public void RefreshInventory()
+    public void RefreshInventory(bool clearSprites)
     {
         /*if (openSlots <= 0)
         {
@@ -80,9 +87,35 @@ public class InventoryUIManager : NetworkBehaviour {
             return;
 
         playerInv = localPlayer.GetComponent<Player>().inventory;
-        Debug.Log("Requesting an Inventory Update.");
-        openSlots--;
-        PopulateInventory();
+
+        if(!clearSprites)
+        {
+            Debug.Log("Requesting an Inventory Update.");
+            openSlots--;
+            PopulateInventory();
+        }
+        else
+        {
+            Debug.LogWarning("Clearing Inventory.");
+            openSlots = inventorySlots.Count - 1;
+            ClearSprites();
+        }
+    }
+
+    public void ClearSprites()
+    {
+        foreach(GameObject slot in inventorySlots)
+        {
+            Debug.Log("Slot " + slot.transform.name + " has " + slot.transform.childCount + " children.");
+            if(slot.transform.childCount > 0)
+            {
+                Debug.LogError("Found " + slot.transform.childCount + " children! Exterminating...");
+
+                Transform itemToRemove = slot.transform.GetChild(0);
+                itemToRemove.SetParent(removedTrans);
+                itemToRemove.gameObject.SetActive(false);
+            }
+        }
     }
 
     public void PopulateInventory()
@@ -92,7 +125,7 @@ public class InventoryUIManager : NetworkBehaviour {
 
         slotChoice = 0;
 
-        if(loopCount >= inventorySlots.Count + 1)
+        if(loopCount >= inventorySlots.Count - 1)
         {
             Debug.LogError("Inventory Full!");
             return;

@@ -42,6 +42,7 @@ public class CharacterBase : NetworkBehaviour {
 
     public MeshRenderer[] meshRenderers;
 
+    #region Startup
     void Start()
     {
         if (!isLocalPlayer)
@@ -51,20 +52,16 @@ public class CharacterBase : NetworkBehaviour {
         transform.name = playerName;
         meshRenderers = GetComponentsInChildren<MeshRenderer>();
 
-        //Debug.LogWarning("Trying to randomize our stats. Our player's NetworkID is " + GetComponent<NetworkIdentity>().netId);
-
         if (strength == 0)
             CmdRandomizeStats(GetComponent<NetworkIdentity>().netId);
         
 
         CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
         RecalculateDamage();
-
-        //RandomizeStats();
-        //GenerateStats();
-        //CmdCalcStats(GetComponent<NetworkIdentity>().netId);
     }
+    #endregion
 
+    #region Update()
     void Update()
     {
         if(attackTimer < weaponAttackDelay)
@@ -72,6 +69,9 @@ public class CharacterBase : NetworkBehaviour {
         if (attackTimer > weaponAttackDelay)
             attackTimer = weaponAttackDelay;
     }
+    #endregion
+
+    #region Updating Stats After Changes
 
     void UpdateStr(int str)
     {
@@ -106,6 +106,9 @@ public class CharacterBase : NetworkBehaviour {
         equipedItem = newItem;
         RecalculateDamage();
     }
+    #endregion
+
+    #region Item Equipping
 
     public void EquipItem(ItemEntry itemToEquip)
     {
@@ -125,6 +128,36 @@ public class CharacterBase : NetworkBehaviour {
         GameObject target = ClientScene.FindLocalObject(playerID);
         target.GetComponent<CharacterBase>().equipedItem = itemToEquip;
     }
+
+    #endregion
+
+    #region Clear Inventory
+    public void ClearInventory()
+    {
+        //Debug.LogWarning("Clearing Inventory...");
+        CmdClearInventory(GetComponent<NetworkIdentity>().netId);
+    }
+
+    [Command]
+    public void CmdClearInventory(NetworkInstanceId targetID)
+    {
+        RpcClearInventory(targetID);
+    }
+
+    [ClientRpc]
+    void RpcClearInventory(NetworkInstanceId targetID)
+    {
+        GameObject target = ClientScene.FindLocalObject(targetID);
+        Player playerScript = target.GetComponent<Player>();
+
+        Debug.Log("RPCClearInventory");
+
+        playerScript.inventory.Clear();
+        playerScript.StartRefreshInventoryCoroutine(0.2f, true);
+    }
+    #endregion
+
+    #region Stat Generation
 
     [Command]
     public void CmdRandomizeStats(NetworkInstanceId playerID)
@@ -219,15 +252,9 @@ public class CharacterBase : NetworkBehaviour {
         GenerateStatsNoNetworking();
     }
 
+    #endregion
 
-    /*[Command]
-    public void CmdReportDamage(NetworkInstanceId playerID, float damage, string source)
-    {
-        Debug.Log("[COMMAND] NetID " + playerID + " has been dealt " + damage + " damage by " + source + ".");
-        GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
-        targetPlayer.GetComponent<CharacterBase>().TakeDamage(playerID, damage, source);
-    }*/
-
+    #region Report Attack
     [Command]
     public void CmdReportAttack(NetworkInstanceId attackerID, NetworkInstanceId playerID, NetworkInstanceId gameManagerID, float modRoll, float damage, string source)
     {
@@ -252,6 +279,44 @@ public class CharacterBase : NetworkBehaviour {
         gameManager.GetComponent<CombatPopup>().DisplayDamage(attackHits, damage, 2, player.position);
     }
 
+    #endregion
+
+    #region Damage Over Time
+    public void StartDoT(NetworkInstanceId GameManagerID, NetworkInstanceId playerID, float damage, float duration, float interval, string source)
+    {
+        CmdApplyDoT(GameManagerID, playerID, damage, duration, interval, source);
+    }
+
+    [Command]
+    public void CmdApplyDoT(NetworkInstanceId GameManagerID, NetworkInstanceId playerID, float damage, float duration, float interval, string source)
+    {
+        //GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
+        RpcApplyDoT(GameManagerID, playerID, damage, duration, interval, source);
+    }
+
+    [ClientRpc]
+    void RpcApplyDoT(NetworkInstanceId GameManagerID, NetworkInstanceId playerID, float damage, float duration, float interval, string source)
+    {
+        GameObject target = ClientScene.FindLocalObject(playerID);
+        GameObject gameManager = ClientScene.FindLocalObject(GameManagerID);
+
+        target.GetComponent<CharacterBase>().StartCoroutine(ApplyDamageOverTime(damage, duration, interval, source));
+    }
+
+    IEnumerator ApplyDamageOverTime(float damage, float duration, float interval, string source)
+    {
+        float timeElapsed = 0.0f;
+        timeElapsed += Time.deltaTime;
+        while (timeElapsed < duration)
+        {
+            yield return new WaitForSeconds(interval);
+            TakeDamage(GetComponent<NetworkIdentity>().netId, damage, source);
+            GameObject.Find("GameManager").GetComponent<CombatPopup>().DisplayDamage(true, damage, 2, transform.position);
+        }
+    }
+    #endregion
+
+    #region Report Heal and Request Respawn Commands
     [Command]
     public void CmdReportHeal(NetworkInstanceId playerID, float amount, string source)
     {
@@ -265,7 +330,9 @@ public class CharacterBase : NetworkBehaviour {
         GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
         targetPlayer.GetComponent<CharacterBase>().RpcRespawnPlayer(playerID);
     }
+    #endregion
 
+    #region Add Stats
     [Command]
     public void CmdAddStats(NetworkInstanceId playerID, int str, int dex, int ints, int vit)
     {
@@ -283,6 +350,10 @@ public class CharacterBase : NetworkBehaviour {
         Debug.Log("Updated Stats.");
     }
 
+    #endregion
+
+    #region Take Damage and Heal Local Functions
+
     public void TakeDamage(NetworkInstanceId playerID, float damage, string source)
     {
         if(isDead)
@@ -298,8 +369,14 @@ public class CharacterBase : NetworkBehaviour {
         Debug.Log(currentHealth + " / " + maxHealth);
         if(currentHealth <= 0)
         {
-            RpcDie(GetComponent<NetworkIdentity>().netId);
+            CmdDie(GetComponent<NetworkIdentity>().netId);
         }
+    }
+
+    [Command]
+    void CmdDie(NetworkInstanceId targetID)
+    {
+        RpcDie(targetID);
     }
 
     private void HealPlayer(NetworkInstanceId playerID, float amount, string source)
@@ -314,7 +391,9 @@ public class CharacterBase : NetworkBehaviour {
             currentHealth = maxHealth;
         Debug.Log(currentHealth + " / " + maxHealth);
     }
+    #endregion
 
+    #region Death and Respawning RPCs
     [ClientRpc]
     private void RpcRespawnPlayer(NetworkInstanceId playerID)
     {
@@ -346,7 +425,7 @@ public class CharacterBase : NetworkBehaviour {
     }
 
     [ClientRpc]
-    public void RpcDie(NetworkInstanceId playerID)
+    void RpcDie(NetworkInstanceId playerID)
     {
 
         GameObject targetPlayer = ClientScene.FindLocalObject(playerID);
@@ -367,6 +446,7 @@ public class CharacterBase : NetworkBehaviour {
 
         //targetPlayer.GetComponent<CapsuleCollider>().enabled = false;
         targetPlayer.gameObject.layer = LayerMask.NameToLayer("Default");
+        targetPlayer.GetComponent<CharacterBase>().StopAllCoroutines();
 
         if (isLocalPlayer)
         {
@@ -401,7 +481,9 @@ public class CharacterBase : NetworkBehaviour {
 
         currentHealth = maxHealth;
     }
+    #endregion
 
+    #region Respawn and Heal Commands
     [Command]
     public void CmdRespawn()
     {
@@ -442,4 +524,5 @@ public class CharacterBase : NetworkBehaviour {
         Debug.Log(gameObject.transform.name + " has been healed for " + amount + " health by " + source + "!");
         Debug.Log(currentHealth + " / " + maxHealth);
     }
+    #endregion
 }

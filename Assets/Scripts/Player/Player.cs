@@ -72,7 +72,7 @@ public class Player : NetworkBehaviour
 
                 GameObject dummy = Instantiate(dummyGO, Vector3.zero, Quaternion.identity) as GameObject;
                 RequestItem(GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, dummy.GetComponent<NetworkIdentity>().netId, Random.Range(0, XMLManager.ins.itemDB.list.Count ));
-                StartCoroutine(RefreshInventory());
+                StartCoroutine(RefreshInventory(0.1f, false));
             }
         }
 
@@ -104,10 +104,16 @@ public class Player : NetworkBehaviour
                 {
                     int index = hit.transform.gameObject.GetComponent<CollectableItem>().itemIndex;
                     RequestItem(GetComponent<NetworkIdentity>().netId, GameObject.Find("GameManager").GetComponent<NetworkIdentity>().netId, hit.transform.gameObject.GetComponent<NetworkIdentity>().netId, index);
-                    StartCoroutine(RefreshInventory());
+                    StartCoroutine(RefreshInventory(0.1f, false));
                 }   
             }
         }
+    }
+
+    public void StartRefreshInventoryCoroutine(float delay, bool clearSprites)
+    {
+        Debug.LogWarning("StartRefreshInventoryCoroutine");
+        StartCoroutine(RefreshInventory(delay, clearSprites));
     }
 
     [Command]
@@ -196,7 +202,7 @@ public class Player : NetworkBehaviour
         {
             Debug.Log("Server has been asked for the item.");
             im.RequestItem(GetComponent<NetworkIdentity>().netId, itemGOID, itemIndex);
-            StartCoroutine(RefreshInventory());
+            StartCoroutine(RefreshInventory(0.1f, false));
         }
         else
         {
@@ -204,40 +210,12 @@ public class Player : NetworkBehaviour
         }
     }
 
-    /*IEnumerator RefreshInventory(NetworkInstanceId objectID)
+    public IEnumerator RefreshInventory(float delay, bool clearSprites)
     {
-        //InventoryUIManager ui;
-        yield return new WaitForSeconds(0.1f);
-
-        if (!Network.isServer)
-        {
-            ClientScene.FindLocalObject(objectID).GetComponent<InventoryUIManager>().RefreshInventory();
-
-        }
-        else
-        {
-            ClientScene.FindLocalObject(objectID).GetComponent<InventoryUIManager>().RefreshInventory();
-        }
-        //ui.RefreshInventory();
-        
-    }*/
-
-    IEnumerator RefreshInventory()
-    {
-        //InventoryUIManager ui;
-
         if (!isLocalPlayer)
             yield return null;
 
-        yield return new WaitForSeconds(0.1f);
-        GameObject.Find("GameManager").GetComponent<InventoryUIManager>().RefreshInventory();
-        //ui.RefreshInventory();
-
+        yield return new WaitForSeconds(delay);
+        GameObject.Find("GameManager").GetComponent<InventoryUIManager>().RefreshInventory(clearSprites);
     }
-
-    /*IEnumerator DisableinventoryUIGOAfterADelay()
-    {
-        yield return new WaitForSeconds(0.15f);
-        inventoryUIGO.SetActive(false);
-    }*/
 }

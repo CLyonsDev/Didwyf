@@ -97,7 +97,7 @@ public class ArrowLogic : NetworkBehaviour {
             }
         }
 
-        DisableCollision();
+        StartCoroutine(DisableCollision(0.1f));
     }
 
     void OnCollisionEnter(Collision col)
@@ -106,12 +106,12 @@ public class ArrowLogic : NetworkBehaviour {
 
         moving = false;
         rb.useGravity = true;
-        StartCoroutine(DisableCollision());
+        StartCoroutine(DisableCollision(1.5f));
     }
 
-    IEnumerator DisableCollision()
+    IEnumerator DisableCollision(float delay)
     {
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(delay);
 
         rb.isKinematic = true;
         gameObject.layer = LayerMask.NameToLayer("Ignore-Player-And-Enemy-Collision");

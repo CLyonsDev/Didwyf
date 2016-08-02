@@ -15,7 +15,6 @@ public class ItemManager : NetworkBehaviour {
                 return;
             }
             Debug.LogWarning("NotServerItemManager");
-            //CmdRequestItem(playerID, itemID);
             RpcRequestItem(playerID, itemGOID, itemID);
         }
         else   
@@ -61,14 +60,11 @@ public class ItemManager : NetworkBehaviour {
             return;
         }
         Debug.Log("Requesting " + XMLManager.ins.itemDB.list[itemID].itemName + " (ID: " + XMLManager.ins.itemDB.list[itemID].itemID + ")");
-        //CmdSendItemToPlayer(playerID, itemID);
 
         player.GetComponent<Player>().inventory.Add(XMLManager.ins.itemDB.list[itemID]);
         if(itemGOID != null)
             NetworkServer.Destroy(ClientScene.FindLocalObject(itemGOID));
         Debug.Log("Sent item to player.");
-
-        //GameObject.Find("GameManager").GetComponent<InventoryUIManager>().RefreshInventory();
     }
 
     [Command]
@@ -88,7 +84,6 @@ public class ItemManager : NetworkBehaviour {
             return;
         }
         Debug.Log("Requesting " + XMLManager.ins.itemDB.list[itemID].itemName + " (ID: " + XMLManager.ins.itemDB.list[itemID].itemID + ")");
-        //CmdSendItemToPlayer(playerID, itemID);
 
         player.GetComponent<Player>().inventory.Add(XMLManager.ins.itemDB.list[itemID]);
         Debug.Log("Sent item to player.");
