@@ -77,12 +77,29 @@ public class Attack : NetworkBehaviour {
         {
             damageRoll = Mathf.Round(Random.Range(cb.totalDamageMin, cb.totalDamageMax));
             eb.TakeDamage(GetComponent<NetworkIdentity>().netId, damageRoll, cb.playerName);
+            if(eb.currentHealth <= 0)
+            {
+                CmdKillTarget(target.GetComponent<NetworkIdentity>().netId);
+            }
         }
 
 
         CmdSpawnDamageBox(didHit, damageRoll, 1, target.transform.position, gameManagerGO.GetComponent<NetworkIdentity>().netId);
 
         attackTimer = 0;
+    }
+
+    [Command]
+    void CmdKillTarget(NetworkInstanceId targetID)
+    {
+        RpcKillTarget(targetID);
+    }
+
+    [ClientRpc]
+    void RpcKillTarget(NetworkInstanceId targetID)
+    {
+        GameObject target = ClientScene.FindLocalObject(targetID);
+        target.GetComponent<EnemyBase>().Die();
     }
 
     [Command]

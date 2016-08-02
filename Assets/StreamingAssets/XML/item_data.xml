@@ -92,10 +92,10 @@
       <damageMax>30</damageMax>
       <critModifier>2</critModifier>
       <weaponRange>3</weaponRange>
-      <attackDelay>2</attackDelay>
+      <attackDelay>4</attackDelay>
       <armor>0</armor>
       <type>Weapon</type>
-      <value>50</value>
+      <value>150</value>
       <rarity>Uncommonly Cool</rarity>
       <spritePath>Sprites/Items/short_fat_sword</spritePath>
     </ItemEntry>

@@ -28,7 +28,7 @@ public class FieldOfView : MonoBehaviour
 
     IEnumerator FindTargetsWithDelay(float delay)
     {
-        while (true)
+        while (!GetComponent<EnemyBase>().isDead)
         {
             yield return new WaitForSeconds(delay);
             FindVisibleTargets();
@@ -68,34 +68,42 @@ public class FieldOfView : MonoBehaviour
                 {
                     visibleTargets.Add(target);
                     //Debug.Log("Found someone!");
-                    AlertAllies();
+                    StartCoroutine(AlertAllies());
                 }
             }
         }
     }
 
-    void AlertAllies()
+    IEnumerator AlertAllies()
     {
-        GetComponent<NavMeshAgent>().SetDestination(visibleTargets[0].position);
+        yield return new WaitForSeconds(0.5f);
+
+        //GetComponent<NavMeshAgent>().SetDestination(visibleTargets[0].position);
+        int targetNum = (Random.Range(0, visibleTargets.Count - 1));
+        GetComponent<NavMeshAgent>().SetDestination(visibleTargets[targetNum].position);
 
         Collider[] alliesInAlertRadius = Physics.OverlapSphere(transform.position, alertRadius, alliedMask);
 
         GetComponent<NavMeshAgent>().speed = GetComponent<EnemyAI>().runSpeed;
-        GetComponent<NavMeshAgent>().SetDestination(visibleTargets[0].position);
+        GetComponent<NavMeshAgent>().SetDestination(visibleTargets[targetNum].position);
         GetComponent<EnemyAI>().attackingPlayer = true;
-        GetComponent<EnemyAI>().target = visibleTargets[0];
+        GetComponent<EnemyAI>().target = visibleTargets[targetNum];
         GetComponent<EnemyAI>().range = GetComponent<EnemyAI>().attackRange;
 
         for (int i = 0; i < alliesInAlertRadius.Length; i++)
         {
+            int allyTargetNum = (Random.Range(0, visibleTargets.Count - 1));
             NavMeshAgent allyNavMesh = alliesInAlertRadius[i].GetComponent<NavMeshAgent>();
             EnemyAI ai = alliesInAlertRadius[i].GetComponent<EnemyAI>();
 
-            allyNavMesh.speed = ai.runSpeed;
-            allyNavMesh.SetDestination(visibleTargets[0].position);
-            ai.attackingPlayer = true;
-            ai.target = visibleTargets[0];
-            ai.range = ai.attackRange;
+            if (allyNavMesh != null && ai != null)
+            {
+                allyNavMesh.speed = ai.runSpeed;
+                allyNavMesh.SetDestination(visibleTargets[allyTargetNum].position);
+                ai.attackingPlayer = true;
+                ai.target = visibleTargets[allyTargetNum];
+                ai.range = ai.attackRange;
+            }
         }
     }
 

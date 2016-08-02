@@ -314,10 +314,28 @@ public class EnemyBase : NetworkBehaviour
         Debug.Log(transform.name + " took " + damage + " damage from \"" + source + "\"!");
         currentHealth -= damage;
         Debug.Log(currentHealth + " / " + maxHealth);
-        if (currentHealth <= 0)
+    }
+
+    public void Die()
+    {
+        currentHealth = 0;
+        isDead = true;
+
+        foreach (MeshRenderer mr in GetComponentsInChildren<MeshRenderer>())
         {
-            RpcDie(GetComponent<NetworkIdentity>().netId);
+            mr.enabled = false;
         }
+
+        GetComponent<EnemyAI>().enabled = false;
+        GetComponent<FieldOfView>().enabled = false;
+
+        if(GetComponent<NavMeshAgent>().isOnNavMesh == true)
+        {
+            GetComponent<NavMeshAgent>().ResetPath();
+        }
+
+        if (NetworkServer.active != false)
+            NetworkServer.Destroy(this.gameObject);
     }
 
     private void HealPlayer(NetworkInstanceId playerID, float amount, string source)
@@ -359,37 +377,6 @@ public class EnemyBase : NetworkBehaviour
 
         currentHealth = maxHealth;
         isDead = false;
-    }
-
-    [ClientRpc]
-    public void RpcDie(NetworkInstanceId playerID)
-    {
-
-        GameObject targetPlayer = ClientScene.FindLocalObject(playerID);
-
-        currentHealth = 0;
-        //Debug.Log("DEAD");
-        isDead = true;
-
-        /*foreach (MeshRenderer m in meshRenderers)
-        {
-            m.enabled = false;
-        }*/
-
-        foreach (MeshRenderer mr in targetPlayer.GetComponentsInChildren<MeshRenderer>())
-        {
-            mr.enabled = false;
-        }
-
-        //if (NetworkServer.active)
-        //{
-            targetPlayer.GetComponent<EnemyAI>().enabled = false;
-            //targetPlayer.GetComponent<NavMeshAgent>().enabled = false;
-            targetPlayer.GetComponent<FieldOfView>().enabled = false;
-            targetPlayer.GetComponent<NavMeshAgent>().ResetPath();
-            NetworkServer.Destroy(targetPlayer);
-            Destroy(targetPlayer);
-        //}
     }
 
     [ClientRpc]

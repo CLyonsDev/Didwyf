@@ -353,7 +353,7 @@ public class CharacterBase : NetworkBehaviour {
 
     #endregion
 
-    #region Take Damage and Heal Local Functions
+    #region Take Damage and Heal Local Functions, Die Command
 
     public void TakeDamage(NetworkInstanceId playerID, float damage, string source)
     {
