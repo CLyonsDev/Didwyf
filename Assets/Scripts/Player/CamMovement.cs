@@ -18,8 +18,17 @@ public class CamMovement : NetworkBehaviour {
         if(!isClient)
             Destroy(gameObject);
 
+        GameObject[] cameras = GameObject.FindGameObjectsWithTag("MainCamera");
+        foreach (GameObject go in cameras)
+        {
+            if(go != cameras[0])
+            {
+                Destroy(go);
+            }
+        }
+
         StartCoroutine(LookForPlayer());
-	}
+    }
 	
 	// Update is called once per frame
 	void Update ()

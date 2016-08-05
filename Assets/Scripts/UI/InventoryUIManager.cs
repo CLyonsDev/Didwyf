@@ -21,7 +21,6 @@ public class InventoryUIManager : NetworkBehaviour {
 
     /*[SyncVar]*/ public int openSlots = -1;
 
-
     // Use this for initialization
     void Start () {
 
