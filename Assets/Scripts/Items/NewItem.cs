@@ -42,9 +42,9 @@ public class NewItem : NetworkBehaviour {
             newPopup.transform.SetParent(canvasGO.transform);
             newPopup.transform.GetChild(0).GetComponent<Text>().text = "Name: " + currentItem.itemName;
 
-            if (currentItem.type == Type.Weapon)
+            if (currentItem.type == ItemType.Weapon)
                 newPopup.transform.GetChild(1).GetComponent<Text>().text = "Damage: " + currentItem.damageMin + " - " + currentItem.damageMax + " (x" + currentItem.critModifier + ")";
-            else if (currentItem.type == Type.Armor)
+            else if (currentItem.type == ItemType.Armor)
                 newPopup.transform.GetChild(1).GetComponent<Text>().text = "Armor Rating: " + currentItem.armor;
             else
                 Destroy(newPopup.transform.GetChild(1).gameObject);

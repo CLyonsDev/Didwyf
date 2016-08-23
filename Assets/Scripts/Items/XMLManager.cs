@@ -58,7 +58,7 @@ public class ItemEntry
     public float attackDelay;
     public int armor;
 
-    public Type type;
+    public ItemType type;
     public int value;
     public string rarity;
 
@@ -73,7 +73,7 @@ public class ItemDatabase
     public List<ItemEntry> list = new List<ItemEntry>();
 }
 
-public enum Type
+public enum ItemType
 {
     Weapon,
     Armor,
