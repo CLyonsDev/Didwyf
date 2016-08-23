@@ -313,6 +313,7 @@ public class EnemyBase : NetworkBehaviour
 
         Debug.Log(transform.name + " took " + damage + " damage from \"" + source + "\"!");
         currentHealth -= damage;
+        //GetComponent<EnemyAI>().aggressive = true;
         Debug.Log(currentHealth + " / " + maxHealth);
     }
 

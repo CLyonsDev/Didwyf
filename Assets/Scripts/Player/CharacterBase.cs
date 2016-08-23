@@ -156,6 +156,7 @@ public class CharacterBase : NetworkBehaviour {
         Debug.Log("RPCClearInventory");
 
         playerScript.inventory.Clear();
+        target.GetComponent<CharacterBase>().equipedItem = null;
         playerScript.StartRefreshInventoryCoroutine(0.2f, true);
     }
     #endregion

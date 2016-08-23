@@ -44,9 +44,10 @@ public class Attack : NetworkBehaviour {
         {
             Debug.Log("Swinging Weapon...");
             RaycastHit hit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity) && hit.transform.tag == "Enemy")
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity) && (hit.transform.tag == "Enemy" || hit.transform.tag == "NPC"))
             {
-                if(Vector3.Distance(transform.position, hit.transform.position) <= cb.weaponRange)
+                hit.transform.gameObject.GetComponent<EnemyAI>().aggressive = true;
+                if (Vector3.Distance(transform.position, hit.transform.position) <= cb.weaponRange)
                 {
                     Debug.Log("Ray has hit!");
                     CalculateAttack(hit.transform.gameObject);

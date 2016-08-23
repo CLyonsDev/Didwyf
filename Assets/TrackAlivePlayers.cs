@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 using System.Collections;
@@ -17,6 +18,7 @@ public class TrackAlivePlayers : NetworkBehaviour {
     public float restartDelay;
 
     [SyncVar] public int alivePlayers = 0;
+    [SyncVar] public bool introLevel = false;
 
     // Use this for initialization
     void Start () {
@@ -34,7 +36,9 @@ public class TrackAlivePlayers : NetworkBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        if(!IsInvoking("CheckPlayersAtInterval"))
+        CheckSceneName();
+
+        if (!IsInvoking("CheckPlayersAtInterval"))
         {
             Debug.LogError("Not invoking!");
             InvokeRepeating("CheckPlayersAtInterval", 0.1f, 0.3f);
@@ -54,7 +58,7 @@ public class TrackAlivePlayers : NetworkBehaviour {
             }
         }
 
-	    if(allPlayersDead)
+	    if(allPlayersDead && !introLevel)
         {
             restartTimer += Time.deltaTime;
             deadTimerText.text = ("Restarting Floor In " + Mathf.Round(restartDelay - restartTimer) + " Seconds...");
@@ -63,7 +67,22 @@ public class TrackAlivePlayers : NetworkBehaviour {
                 foreach(GameObject go in playerList)
                 {
                     allPlayersDead = false;
+                    go.GetComponent<CharacterBase>().ClearInventory();
                     go.GetComponent<Player>().CmdReloadLevel(); 
+                }
+            }
+        }else if(allPlayersDead && introLevel)
+        {
+            gameTextCanvasGO.transform.GetChild(0).gameObject.GetComponent<Text>().text = ("You have been apprehended!");
+            deadTimerText.text = ("As punishment for your crimes, you will be sent to clear out some nearby dungeons!");
+
+            restartTimer += Time.deltaTime;
+            if (restartTimer >= restartDelay)
+            {
+                foreach (GameObject go in playerList)
+                {
+                    allPlayersDead = false;
+                    go.GetComponent<Player>().CmdNextLevel();
                 }
             }
         }
@@ -129,6 +148,23 @@ public class TrackAlivePlayers : NetworkBehaviour {
                     gameTextCanvasGO.transform.GetChild(i).gameObject.SetActive(false);
                 }
             }
+        }
+    }
+
+    void CheckSceneName()
+    {
+        if (SceneManager.GetActiveScene().name == "Tavern" && !introLevel)
+        {
+            Debug.Log("Intro scene!");
+            restartDelay = 6f;
+            introLevel = true;
+            GetComponent<IntroSceneLogic>().enabled = true;
+        }
+        else if (introLevel && !SceneManager.GetActiveScene().name.Equals("Tavern"))
+        {
+            introLevel = false;
+            restartDelay = 4f;
+            GetComponent<IntroSceneLogic>().enabled = false;
         }
     }
 }

@@ -122,6 +122,12 @@ public class Player : NetworkBehaviour
         NetworkManager.singleton.ServerChangeScene(NetworkManager.networkSceneName);
     }
 
+    [Command]
+    public void CmdNextLevel()
+    {
+        NetworkManager.singleton.ServerChangeScene("TutorialDungeon");
+    }
+
     void SwitchCanvasEnabled()
     {
         inventoryUIGO.SetActive(canvasEnabled);
