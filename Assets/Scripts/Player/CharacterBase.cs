@@ -290,7 +290,8 @@ public class CharacterBase : NetworkBehaviour {
     #region Damage Over Time
     public void StartDoT(NetworkInstanceId GameManagerID, NetworkInstanceId playerID, float damageMin, float damageMax, float duration, float interval, string source)
     {
-        CmdApplyDoT(GameManagerID, playerID, damageMin, damageMax, duration, interval, source);
+        if(!isDead)
+            CmdApplyDoT(GameManagerID, playerID, damageMin, damageMax, duration, interval, source);
     }
 
     [Command]
@@ -311,6 +312,8 @@ public class CharacterBase : NetworkBehaviour {
 
     IEnumerator ApplyDamageOverTime(float damageMin, float damageMax, float duration, float interval, string source)
     {
+        if (isDead)
+            yield return null;
         float timeElapsed = 0.0f;
         timeElapsed += Time.deltaTime;
         while (timeElapsed < duration)
