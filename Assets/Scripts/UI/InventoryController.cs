@@ -126,8 +126,8 @@ public class InventoryController : NetworkBehaviour {
             newItem.transform.SetParent(inventorySlots[i].transform, false);
             newItem.GetComponent<ItemLogic>().curItem = ItemDatabase_OLD.itemList[i];
             newItem.name = ItemDatabase_OLD.itemList[i].itemName;
-            NetworkServer.Spawn(newItem);
-
+            if(NetworkServer.active)
+                NetworkServer.Spawn(newItem);
         }
     }
 }

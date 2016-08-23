@@ -39,6 +39,7 @@ public class CharacterBase : NetworkBehaviour {
     [SyncVar] public float totalDamageMax;
 
     [SyncVar] public bool isDead = false;
+    [SyncVar] public bool healingOverTime = false;
 
     public MeshRenderer[] meshRenderers;
 
@@ -58,6 +59,8 @@ public class CharacterBase : NetworkBehaviour {
 
         CmdGenerateStats(GetComponent<NetworkIdentity>().netId);
         RecalculateDamage();
+
+        GameObject.Find("GameManager").GetComponent<TrackAlivePlayers>().CheckPlayersAlive();
     }
     #endregion
 
@@ -153,6 +156,7 @@ public class CharacterBase : NetworkBehaviour {
         Debug.Log("RPCClearInventory");
 
         playerScript.inventory.Clear();
+        target.GetComponent<CharacterBase>().equipedItem = null;
         playerScript.StartRefreshInventoryCoroutine(0.2f, true);
     }
     #endregion
@@ -228,7 +232,7 @@ public class CharacterBase : NetworkBehaviour {
         }
         else
         {
-            weaponRange = 1f;
+            weaponRange = 2f;
             weaponDamageMin = 1;
             weaponDamageMax = 4;
             weaponAttackDelay = 0.75f;
@@ -259,6 +263,8 @@ public class CharacterBase : NetworkBehaviour {
     public void CmdReportAttack(NetworkInstanceId attackerID, NetworkInstanceId playerID, NetworkInstanceId gameManagerID, float modRoll, float damage, string source)
     {
         GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
+        if (targetPlayer.GetComponent<CharacterBase>().isDead)
+            return;
         RpcReportAttack(attackerID, attackerID, gameManagerID, modRoll, damage, source);
         targetPlayer.GetComponent<CharacterBase>().TakeDamage(playerID, damage, source);
     }
@@ -284,7 +290,8 @@ public class CharacterBase : NetworkBehaviour {
     #region Damage Over Time
     public void StartDoT(NetworkInstanceId GameManagerID, NetworkInstanceId playerID, float damageMin, float damageMax, float duration, float interval, string source)
     {
-        CmdApplyDoT(GameManagerID, playerID, damageMin, damageMax, duration, interval, source);
+        if(!isDead)
+            CmdApplyDoT(GameManagerID, playerID, damageMin, damageMax, duration, interval, source);
     }
 
     [Command]
@@ -305,6 +312,8 @@ public class CharacterBase : NetworkBehaviour {
 
     IEnumerator ApplyDamageOverTime(float damageMin, float damageMax, float duration, float interval, string source)
     {
+        if (isDead)
+            yield return null;
         float timeElapsed = 0.0f;
         timeElapsed += Time.deltaTime;
         while (timeElapsed < duration)
@@ -317,12 +326,48 @@ public class CharacterBase : NetworkBehaviour {
     }
     #endregion
 
+    #region Heal Over Time
+    public void StartHoT(NetworkInstanceId gameManagerID, NetworkInstanceId playerID, float healMin, float healMax, float duration, float interval, string source)
+    {
+        CmdApplyHoT(gameManagerID, playerID, healMin, healMax, duration, interval, source);
+    }
+
+    private void CmdApplyHoT(NetworkInstanceId gameManagerID, NetworkInstanceId playerID, float healMin, float healMax, float duration, float interval, string source)
+    {
+        RpcApplyHoT(gameManagerID, playerID, healMin, healMax, duration, interval, source);
+    }
+
+    private void RpcApplyHoT(NetworkInstanceId gameManagerID, NetworkInstanceId playerID, float healMin, float healMax, float duration, float interval, string source)
+    {
+        GameObject target = ClientScene.FindLocalObject(playerID);
+        target.GetComponent<CharacterBase>().StartCoroutine(ApplyHoT(healMin, healMax, duration, interval, source));
+    }
+
+    IEnumerator ApplyHoT(float healMin, float healMax, float duration, float interval, string source)
+    {
+        healingOverTime = true;
+        float timeElapsed = 0.0f;
+        timeElapsed += Time.deltaTime;
+        while (timeElapsed < duration)
+        {
+            if (healingOverTime == false)
+                break;
+            yield return new WaitForSeconds(interval);
+            float healAmt = Mathf.Round(Random.Range(healMin, healMax));
+            CmdHeal(GetComponent<NetworkIdentity>().netId, healAmt, source);
+            //GameObject.Find("GameManager").GetComponent<CombatPopup>().DisplayDamage(true, damage, 2, transform.position);
+        }
+        healingOverTime = false;
+    }
+    #endregion
+
     #region Report Heal and Request Respawn Commands
     [Command]
     public void CmdReportHeal(NetworkInstanceId playerID, float amount, string source)
     {
         GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
         targetPlayer.GetComponent<CharacterBase>().HealPlayer(playerID, amount, source);
+        RpcSpawnParticleSystem(playerID, 0);
     }
 
     [Command]
@@ -330,6 +375,15 @@ public class CharacterBase : NetworkBehaviour {
     {
         GameObject targetPlayer = NetworkServer.FindLocalObject(playerID);
         targetPlayer.GetComponent<CharacterBase>().RpcRespawnPlayer(playerID);
+    }
+    #endregion
+
+    #region Spawn Particle System
+    [ClientRpc]
+    public void RpcSpawnParticleSystem(NetworkInstanceId targetID, int particleIndex)
+    {
+        ClientScene.FindLocalObject(targetID).GetComponent<SpawnParticleSystem>().SpawnParticleSystemFromIndex(particleIndex);
+        Debug.Log("Spawning particle system");
     }
     #endregion
 
@@ -511,7 +565,7 @@ public class CharacterBase : NetworkBehaviour {
     }
 
     [Command]
-    public void CmdHeal(float amount, string source)
+    public void CmdHeal(NetworkInstanceId playerID, float amount, string source)
     {
         if(isDead)
         {
@@ -519,11 +573,24 @@ public class CharacterBase : NetworkBehaviour {
             return;
         }
 
+        if(currentHealth >= maxHealth)
+        {
+            Debug.LogError(source + " is trying to heal " + transform.name + " but they are already at full health!");
+            StopCoroutine("ApplyHot");
+            healingOverTime = false;
+            return;
+        }
+
         currentHealth += amount;
         if (currentHealth > maxHealth)
             currentHealth = maxHealth;
+
+        //GetComponent<SpawnParticleSystem>().SpawnParticleSystemFromIndex(0);
+        RpcSpawnParticleSystem(playerID, 0);
         Debug.Log(gameObject.transform.name + " has been healed for " + amount + " health by " + source + "!");
         Debug.Log(currentHealth + " / " + maxHealth);
+
+
     }
     #endregion
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Variables xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <armorProtection>1</armorProtection>
+  <maxEvade>4</maxEvade>
+  <charType>NPC</charType>
+  <charName>Civilian</charName>
+  <critMult>2</critMult>
+  <weaponDamageMin>1</weaponDamageMin>
+  <weaponDamageMax>2</weaponDamageMax>
+  <str>0</str>
+  <dex>2</dex>
+  <ints>5</ints>
+  <vit>4</vit>
+</Variables>

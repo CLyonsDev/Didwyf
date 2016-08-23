@@ -17,6 +17,8 @@ public class FieldOfView : MonoBehaviour
     public LayerMask obstacleMask;
     public LayerMask alliedMask;
 
+    EnemyAI ai;
+
     [HideInInspector]
     public List<Transform> visibleTargets = new List<Transform>();
 
@@ -28,6 +30,9 @@ public class FieldOfView : MonoBehaviour
 
     IEnumerator FindTargetsWithDelay(float delay)
     {
+        if(ai == null)
+            ai = GetComponent<EnemyAI>();
+
         while (!GetComponent<EnemyBase>().isDead)
         {
             yield return new WaitForSeconds(delay);
@@ -45,6 +50,9 @@ public class FieldOfView : MonoBehaviour
 
     void FindVisibleTargets()
     {
+        if (ai.aggressive == false)
+            return;
+
         visibleTargets.Clear();
         List<Collider> targetsInViewRadius = new List<Collider>();
         targetsInViewRadius.AddRange(Physics.OverlapSphere(transform.position, viewRadius, targetMask));

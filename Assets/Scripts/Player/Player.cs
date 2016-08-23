@@ -49,7 +49,7 @@ public class Player : NetworkBehaviour
 
         if(Input.GetKeyDown(KeyCode.V))
         {
-            GetComponent<CharacterBase>().CmdHeal(5, "An Omniscient Deity");
+            GetComponent<CharacterBase>().CmdHeal(GetComponent<NetworkIdentity>().netId, 5, "An Omniscient Deity");
         }
 
         if (Input.GetKeyDown(KeyCode.N))
@@ -117,9 +117,15 @@ public class Player : NetworkBehaviour
     }
 
     [Command]
-    void CmdReloadLevel()
+    public void CmdReloadLevel()
     {
         NetworkManager.singleton.ServerChangeScene(NetworkManager.networkSceneName);
+    }
+
+    [Command]
+    public void CmdNextLevel()
+    {
+        NetworkManager.singleton.ServerChangeScene("TutorialDungeon");
     }
 
     void SwitchCanvasEnabled()

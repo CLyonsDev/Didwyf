@@ -12,6 +12,7 @@ public class InventoryUIManager : NetworkBehaviour {
     Transform removedTrans; //Triggered
 
     public List<GameObject> inventorySlots = new List<GameObject>();
+    public List<GameObject> equipmentSLots = new List<GameObject>();
 
     public List<ItemEntry> playerInv = new List<ItemEntry>();
 
@@ -20,7 +21,6 @@ public class InventoryUIManager : NetworkBehaviour {
     int loopCount;
 
     /*[SyncVar]*/ public int openSlots = -1;
-
 
     // Use this for initialization
     void Start () {
@@ -70,7 +70,9 @@ public class InventoryUIManager : NetworkBehaviour {
     void GrabInventorySlots()
     {
         inventorySlots.Clear();
+        equipmentSLots.Clear();
         inventorySlots.AddRange(GameObject.FindGameObjectsWithTag("ItemSlot"));
+        equipmentSLots.AddRange(GameObject.FindGameObjectsWithTag("CharacterEquipmentSlot"));
         openSlots = inventorySlots.Count;
         //inventorySlots.Sort(IComparer<>);
     }
@@ -112,6 +114,16 @@ public class InventoryUIManager : NetworkBehaviour {
                 Debug.LogError("Found " + slot.transform.childCount + " children! Exterminating...");
 
                 Transform itemToRemove = slot.transform.GetChild(0);
+                itemToRemove.SetParent(removedTrans);
+                itemToRemove.gameObject.SetActive(false);
+            }
+        }
+
+        foreach(GameObject equipSlot in inventorySlots)
+        {
+            if(equipSlot.transform.childCount > 0)
+            {
+                Transform itemToRemove = equipSlot.transform.GetChild(0);
                 itemToRemove.SetParent(removedTrans);
                 itemToRemove.gameObject.SetActive(false);
             }

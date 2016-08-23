@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Variables xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <armorProtection>8</armorProtection>
+  <maxEvade>20</maxEvade>
+  <charType>Npc</charType>
+  <charName>Town Guard</charName>
+  <critMult>2</critMult>
+  <weaponDamageMin>1</weaponDamageMin>
+  <weaponDamageMax>10</weaponDamageMax>
+  <str>10</str>
+  <dex>5</dex>
+  <ints>5</ints>
+  <vit>15</vit>
+</Variables>

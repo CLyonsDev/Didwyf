@@ -44,11 +44,11 @@
       <spritePath>Sprites/Items/health_potion</spritePath>
     </ItemEntry>
     <ItemEntry>
-      <itemName>Simple Knife</itemName>
+      <itemName>Simple Dagger</itemName>
       <itemID>3</itemID>
       <damageMin>1</damageMin>
-      <damageMax>3</damageMax>
-      <critModifier>2</critModifier>
+      <damageMax>6</damageMax>
+      <critModifier>3</critModifier>
       <weaponRange>2</weaponRange>
       <attackDelay>0.4</attackDelay>
       <armor>0</armor>

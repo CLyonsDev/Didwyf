@@ -22,6 +22,8 @@ public class EnemyAI : NetworkBehaviour {
     public float rateOfAttack = 1;
     public float timer = 0;
 
+    [SyncVar] public bool aggressive;
+
     public Transform[] waypoints;
     [SyncVar] public Transform target;
 
@@ -60,7 +62,8 @@ public class EnemyAI : NetworkBehaviour {
         if (GetComponent<EnemyBase>().isDead)
             return;
 
-        RotateTowards(target);
+        if(target != null)
+            RotateTowards(target);
 
         if (patrol && !attackingPlayer)
         {
